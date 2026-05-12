@@ -181,6 +181,9 @@ body {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
     padding: 2rem 1.75rem;
+    flex: 1;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 /* ── Stat cards ─────────────────────────────────────── */
