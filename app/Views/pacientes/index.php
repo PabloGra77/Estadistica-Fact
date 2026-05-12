@@ -42,9 +42,9 @@ require BASE_PATH . '/app/Views/layout/header.php';
                     <th class="d-none d-md-table-cell" style="width:55px">#</th>
                     <th style="width:120px">Documento</th>
                     <th style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nombre</th>
-                    <th class="d-none d-sm-table-cell" style="width:85px">Paquete</th>
+                    <th style="width:85px">Paquete</th>
                     <th class="d-none d-lg-table-cell" style="width:85px">NUI</th>
-                    <th class="d-none d-sm-table-cell" style="width:85px">Atenciones</th>
+                    <th style="width:85px">Atenciones</th>
                     <th class="d-none d-lg-table-cell" style="width:90px">Registrado</th>
                     <th style="width:44px"></th>
                 </tr>
@@ -58,9 +58,9 @@ require BASE_PATH . '/app/Views/layout/header.php';
                     <td class="text-muted d-none d-md-table-cell"><?= Security::e($p['id']) ?></td>
                     <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
                     <td style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['nombre']) ?></td>
-                    <td class="d-none d-sm-table-cell"><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
+                    <td><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
                     <td class="text-muted small d-none d-lg-table-cell"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
-                    <td class="d-none d-sm-table-cell"><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
+                    <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
                     <td class="d-none d-lg-table-cell"><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
                     <td>
                         <?php if (Auth::isAdmin() || Auth::isFacturador()): ?>
