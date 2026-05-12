@@ -146,27 +146,7 @@ $errorMsg ??= null;
         <div class="deco-ring dr3"></div>
         <span class="lb-badge">Sistema de Gestión</span>
         <div class="lb-ppl">PPL</div>
-        <div class="lb-title">Personas Privadas de la Libertad</div>
-        <div class="lb-sub">IPS Goleman Servicio Integral S.A.S.<br>Tablero de Atenciones</div>
-        <div class="lb-divider"></div>
-        <ul class="lb-roles">
-            <li class="lb-role">
-                <div class="lb-role-icon" style="background:rgba(96,165,250,.15)">⚙️</div>
-                <div class="lb-role-info"><strong>Administrador</strong><span>Acceso total al sistema</span></div>
-            </li>
-            <li class="lb-role">
-                <div class="lb-role-icon" style="background:rgba(52,211,153,.15)">💳</div>
-                <div class="lb-role-info"><strong>Facturador</strong><span>Gestión y cargue de facturación</span></div>
-            </li>
-            <li class="lb-role">
-                <div class="lb-role-icon" style="background:rgba(251,191,36,.15)">👥</div>
-                <div class="lb-role-info"><strong>Equipo PPL</strong><span>Atención y seguimiento de pacientes</span></div>
-            </li>
-            <li class="lb-role">
-                <div class="lb-role-icon" style="background:rgba(167,139,250,.15)">📊</div>
-                <div class="lb-role-info"><strong>Estadístico</strong><span>Análisis de datos y reportes</span></div>
-            </li>
-        </ul>
+        <div class="lb-title">Estadística · Facturación</div>
     </div>
 
     <!-- Panel derecho -->
@@ -197,7 +177,7 @@ $errorMsg ??= null;
                         <input id="usuario" name="usuario" type="text"
                                placeholder="nombre.apellido" autocomplete="username"
                                maxlength="100" required/>
-                        <span class="domain-addon">@ipsgoleman.com</span>
+                        <span class="domain-addon">@ipsgoleman.com.co</span>
                     </div>
                 </div>
 
