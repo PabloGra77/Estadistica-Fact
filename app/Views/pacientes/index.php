@@ -48,8 +48,13 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 </tr>
             </thead>
             <tbody>
-            <?php if (empty($pacientes)): ?>
-                <tr><td colspan="6" class="text-center text-muted py-4">Sin resultados.</td></tr>
+            <?php if ($busqueda === ''): ?>
+                <tr><td colspan="6" class="text-center text-muted py-5">
+                    <i class="bi bi-search fs-3 d-block mb-2 opacity-50"></i>
+                    Ingresá un nombre o número de documento para buscar pacientes.
+                </td></tr>
+            <?php elseif (empty($pacientes)): ?>
+                <tr><td colspan="6" class="text-center text-muted py-4">Sin resultados para <strong><?= Security::e($busqueda) ?></strong>.</td></tr>
             <?php else: ?>
                 <?php foreach ($pacientes as $p): ?>
                 <tr>

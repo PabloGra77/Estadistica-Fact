@@ -15,27 +15,33 @@ if ($uri === '/pacientes' && $method === 'GET') {
     $porPagina = 20;
     $offset    = ($pagina - 1) * $porPagina;
 
-    $where  = $busqueda !== '' ? "AND (p.documento LIKE ? OR p.nombre LIKE ?)" : '';
-    $params = $busqueda !== '' ? ["%$busqueda%", "%$busqueda%"] : [];
+    $pacientes    = [];
+    $total        = 0;
+    $totalPaginas = 0;
 
-    $total = Database::fetchOne(
-        "SELECT COUNT(*) AS total FROM Pacientes p WHERE p.activo=1 $where",
-        $params
-    )['total'] ?? 0;
+    if ($busqueda !== '') {
+        $params = ["%$busqueda%", "%$busqueda%"];
+        $where  = "AND (p.documento LIKE ? OR p.nombre LIKE ?)";
 
-    $pacientes = Database::fetchAll(
-        "SELECT p.id, p.documento, p.nombre, p.paquete, p.nui, p.fecha_creacion,
-                COUNT(a.id) AS num_atenciones
-         FROM Pacientes p
-         LEFT JOIN Atenciones a ON a.paciente_id = p.id
-         WHERE p.activo=1 $where
-         GROUP BY p.id
-         ORDER BY p.nombre ASC
-         LIMIT $porPagina OFFSET $offset",
-        $params
-    );
+        $total = Database::fetchOne(
+            "SELECT COUNT(*) AS total FROM Pacientes p WHERE p.activo=1 $where",
+            $params
+        )['total'] ?? 0;
 
-    $totalPaginas = (int)ceil($total / $porPagina);
+        $pacientes = Database::fetchAll(
+            "SELECT p.id, p.documento, p.nombre, p.paquete, p.nui, p.fecha_creacion,
+                    COUNT(a.id) AS num_atenciones
+             FROM Pacientes p
+             LEFT JOIN Atenciones a ON a.paciente_id = p.id
+             WHERE p.activo=1 $where
+             GROUP BY p.id
+             ORDER BY p.nombre ASC
+             LIMIT $porPagina OFFSET $offset",
+            $params
+        );
+
+        $totalPaginas = (int)ceil($total / $porPagina);
+    }
     require BASE_PATH . '/app/Views/pacientes/index.php';
     exit;
 }
