@@ -36,32 +36,28 @@ require BASE_PATH . '/app/Views/layout/header.php';
 </form>
 
 <div class="card border-0 shadow-sm">
-        <table class="table table-hover align-middle small mb-0 w-100">
+        <table class="table table-hover align-middle small mb-0" style="table-layout:fixed;width:100%">
             <thead class="table-light">
                 <tr>
-                    <th class="d-none d-md-table-cell" style="width:55px">#</th>
-                    <th style="width:120px">Documento</th>
-                    <th style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nombre</th>
-                    <th style="width:85px">Paquete</th>
-                    <th class="d-none d-lg-table-cell" style="width:85px">NUI</th>
+                    <th style="width:55px">#</th>
+                    <th style="width:130px">Documento</th>
+                    <th>Nombre</th>
+                    <th style="width:80px">Paquete</th>
                     <th style="width:85px">Atenciones</th>
-                    <th class="d-none d-lg-table-cell" style="width:90px">Registrado</th>
                     <th style="width:44px"></th>
                 </tr>
             </thead>
             <tbody>
             <?php if (empty($pacientes)): ?>
-                <tr><td colspan="8" class="text-center text-muted py-4">Sin resultados.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">Sin resultados.</td></tr>
             <?php else: ?>
                 <?php foreach ($pacientes as $p): ?>
                 <tr>
-                    <td class="text-muted d-none d-md-table-cell"><?= Security::e($p['id']) ?></td>
-                    <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
-                    <td style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['nombre']) ?></td>
+                    <td class="text-muted"><?= Security::e($p['id']) ?></td>
+                    <td class="fw-medium" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['documento']) ?></td>
+                    <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['nombre']) ?></td>
                     <td><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
-                    <td class="text-muted small d-none d-lg-table-cell"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
                     <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
-                    <td class="d-none d-lg-table-cell"><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
                     <td>
                         <?php if (Auth::isAdmin() || Auth::isFacturador()): ?>
                         <a href="/pacientes/<?= (int)$p['id'] ?>/editar" class="btn btn-xs btn-outline-secondary">
