@@ -1,0 +1,68 @@
+name: Crear Release para Hostinger
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Generar ZIP y publicar Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Obtener fecha y versión
+        id: version
+        run: |
+          echo "TAG=release-$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+          echo "DATE=$(date +'%d/%m/%Y %H:%M')" >> $GITHUB_OUTPUT
+
+      - name: Crear ZIP de despliegue
+        run: |
+          # Crear zip excluyendo archivos que NO van al servidor
+          zip -r tablero-ppl.zip . \
+            --exclude "*.git*" \
+            --exclude ".github/*" \
+            --exclude "config/config.php" \
+            --exclude "sql/seed.sql" \
+            --exclude "storage/soportes/*" \
+            --exclude "storage/logs/*" \
+            --exclude "storage/temp/*" \
+            --exclude "vendor/*" \
+            --exclude "*.zip" \
+            --exclude ".gitignore" \
+            --exclude "composer.json" \
+            --exclude "DESPLIEGUE_HOSTINGER.md"
+
+      - name: Publicar Release en GitHub
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: "Tablero PPL — ${{ steps.version.outputs.DATE }}"
+          body: |
+            ## Despliegue en Hostinger
+
+            ### Pasos:
+            1. Descarga **tablero-ppl.zip**
+            2. Sube y descomprime en **hPanel → File Manager**
+            3. Estructura en el servidor:
+               ```
+               public_html/          ← sube el contenido de public/
+               tablero-app/          ← sube app/, config/, storage/, sql/
+                 ├── app/
+                 ├── config/         ← edita config.php con tus credenciales
+                 ├── storage/
+                 └── sql/
+               ```
+            4. Edita `config/config.php` con tus datos de base de datos
+            5. Importa `sql/schema.sql` en phpMyAdmin
+
+            > ⚠️ El zip **no incluye** `config/config.php` (contiene credenciales).
+            > Usa `config/config.example.php` como plantilla.
+          files: tablero-ppl.zip
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
