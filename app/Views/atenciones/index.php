@@ -1,4 +1,4 @@
-<?php $pageTitle = 'Atenciones — PPL';
+<?php $pageTitle = 'Estadística PPL';
 require BASE_PATH . '/app/Views/layout/header.php';
 $meses = ['','Enero','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 $mesNombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -6,7 +6,7 @@ $tabActiva = ($_GET['tab'] ?? 'lista') === 'tablero' ? 'tablero' : 'lista';
 ?>
 
 <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="fw-bold mb-0"><i class="bi bi-calendar2-check-fill me-2 text-success"></i>Atenciones</h2>
+    <h2 class="fw-bold mb-0"><i class="bi bi-bar-chart-line-fill me-2 text-success"></i>Estadística PPL</h2>
     <?php if (!Auth::isEstadistico()): ?>
     <a href="/atenciones/crear" class="btn btn-success btn-sm">
         <i class="bi bi-plus-lg me-1"></i>Nueva atención

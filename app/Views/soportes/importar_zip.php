@@ -30,12 +30,16 @@ require BASE_PATH . '/app/Views/layout/header.php'; ?>
         <div class="row g-2 mb-3">
             <?php
             $descripciones = [
-                'VALPS' => 'Valoración Inicial Psicología',
-                'VALPQ' => 'Valoración Inicial Psiquiatría',
+                'VALPS' => 'Primera vez Psicología',
+                'VALPQ' => 'Primera vez Psiquiatría',
                 'PS'    => 'Evolución Psicología',
-                'PQ'    => 'Evolución Psiquiatría',
-                'TF'    => 'Terapia Física / Fisioterapia',
+                'PQ'    => 'Evolución Psiquiátrica',
+                'TF'    => 'Fisioterapia',
                 'TS'    => 'Trabajo Social',
+                'TZ'    => 'Tamizaje',
+                'PYP'   => 'PYP',
+                'MED'   => 'Acta de Medicamentos',
+                'REG'   => 'Regencia',
             ];
             foreach (TIPOS_SERVICIO as $idx => $codigo): ?>
             <div class="col-6 col-md-4 col-lg-3">

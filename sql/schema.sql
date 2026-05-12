@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS Atenciones (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     paciente_id     INT UNSIGNED    NOT NULL,
     servicio        TINYINT UNSIGNED NOT NULL
-                        COMMENT '0=VALPS 1=VALPQ 2=PS 3=PQ 4=TF(TerapiaFisica) 5=TS(TrabajoSocial)',
+                        COMMENT '0=VALPS 1=VALPQ 2=PS 3=PQ 4=TF 5=TS 6=TZ 7=PYP 8=MED 9=REG',
     anio_atencion   SMALLINT UNSIGNED NOT NULL,
     mes_atencion    TINYINT UNSIGNED  NOT NULL,
     fecha_carga     DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,

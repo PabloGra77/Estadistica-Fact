@@ -117,7 +117,7 @@ if ($uri === '/atenciones/crear') {
         Security::verifyCsrf();
 
         $pacienteId   = Security::validateInt($_POST['paciente_id'] ?? '', 1);
-        $servicio     = Security::validateInt($_POST['servicio'] ?? '', 0, 5);
+        $servicio     = Security::validateInt($_POST['servicio'] ?? '', 0, 9);
         $anioAtencion = Security::validateInt($_POST['anio_atencion'] ?? '', 2020, 2099);
         $mesAtencion  = Security::validateInt($_POST['mes_atencion'] ?? '', 1, 12);
 

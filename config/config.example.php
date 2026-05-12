@@ -55,7 +55,7 @@ const ROL_NOMBRES = [
 ];
 
 // ── Catálogos ─────────────────────────────────────────────────────────────────
-const TIPOS_SERVICIO = ['VALPS', 'VALPQ', 'PS', 'PQ', 'TF', 'TS'];
+const TIPOS_SERVICIO = ['VALPS','VALPQ','PS','PQ','TF','TS','TZ','PYP','MED','REG'];
 
 const ESTADOS_SOPORTE = [
     0 => 'Pendiente',
@@ -125,7 +125,7 @@ const ROL_NOMBRES = [
 ];
 
 // ── Servicios y paquetes ──────────────────────────────────────────────────────
-const TIPOS_SERVICIO = ['VALPS', 'VALPQ', 'PS', 'PQ', 'TF', 'TS'];
+const TIPOS_SERVICIO = ['VALPS','VALPQ','PS','PQ','TF','TS','TZ','PYP','MED','REG'];
 
 const ESTADOS_SOPORTE = [
     0 => 'Pendiente',

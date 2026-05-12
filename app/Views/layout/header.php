@@ -51,7 +51,7 @@ $rolNombre = Auth::rolNombre();
                 <i class="bi bi-people-fill"></i> Pacientes
             </a>
             <a href="/atenciones" class="nav-item <?= str_starts_with($uri, '/atenciones') ? 'active' : '' ?>">
-                <i class="bi bi-calendar2-check-fill"></i> Atenciones
+                <i class="bi bi-bar-chart-line-fill"></i> Estadística PPL
             </a>
             <a href="/soportes" class="nav-item <?= str_starts_with($uri, '/soportes') ? 'active' : '' ?>">
                 <i class="bi bi-file-earmark-text-fill"></i> Soportes
