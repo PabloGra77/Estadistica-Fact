@@ -2,8 +2,8 @@
 # .gitignore — Tablero PPL
 # =============================================================================
 
-# Credenciales y configuración local
-.env
+# Credenciales — config.php tiene los datos reales, NO va a GitHub
+/config/config.php
 
 # Dependencias Composer
 /vendor/
@@ -20,7 +20,7 @@
 /storage/temp/*
 !/storage/temp/.gitkeep
 
-# SQL de producción (contiene hashes de contraseñas)
+# SQL de producción (contiene hashes de contraseñas reales)
 /sql/seed.sql
 
 # Backups y comprimidos
