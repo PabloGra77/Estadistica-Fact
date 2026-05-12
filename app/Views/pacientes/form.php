@@ -1,6 +1,6 @@
 <?php
 $modoEditar ??= false;
-$values     ??= ['documento' => '', 'nombre' => '', 'paquete' => 1, 'activo' => 1];
+$values     ??= ['documento' => '', 'nombre' => '', 'paquete' => 1, 'nui' => '', 'activo' => 1];
 $errors     ??= [];
 $pageTitle = ($modoEditar ? 'Editar' : 'Nuevo') . ' Paciente — PPL';
 require BASE_PATH . '/app/Views/layout/header.php';
@@ -42,6 +42,13 @@ require BASE_PATH . '/app/Views/layout/header.php';
                     <option value="1" <?= (int)$values['paquete'] === 1 ? 'selected' : '' ?>>Paquete 1</option>
                     <option value="2" <?= (int)$values['paquete'] === 2 ? 'selected' : '' ?>>Paquete 2</option>
                 </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="nui" class="form-label fw-semibold small">NUI <span class="text-muted fw-normal">(opcional)</span></label>
+                <input type="text" id="nui" name="nui" class="form-control form-control-sm"
+                       value="<?= Security::e($values['nui'] ?? '') ?>"
+                       maxlength="30" placeholder="Número único interno" />
             </div>
 
             <?php if ($modoEditar): ?>

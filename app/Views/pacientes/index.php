@@ -4,11 +4,19 @@ require BASE_PATH . '/app/Views/layout/header.php';
 
 <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fw-bold mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>Pacientes</h2>
-    <?php if (Auth::isAdmin() || Auth::isFacturador() || Auth::isEquipoPPL()): ?>
-    <a href="/pacientes/crear" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>Nuevo paciente
-    </a>
-    <?php endif; ?>
+    <div class="d-flex gap-2">
+        <a href="/pacientes/exportar" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-file-earmark-arrow-down me-1"></i>Descargar informe
+        </a>
+        <?php if (Auth::isAdmin() || Auth::isFacturador() || Auth::isEquipoPPL()): ?>
+        <a href="/pacientes/importar" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-upload me-1"></i>Importar
+        </a>
+        <a href="/pacientes/crear" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo paciente
+        </a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <?php if (!empty($_GET['ok'])): ?>
@@ -36,6 +44,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
                     <th>Documento</th>
                     <th>Nombre</th>
                     <th>Paquete</th>
+                    <th>NUI</th>
                     <th>Atenciones</th>
                     <th>Registrado</th>
                     <th></th>
@@ -43,7 +52,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
             </thead>
             <tbody>
             <?php if (empty($pacientes)): ?>
-                <tr><td colspan="7" class="text-center text-muted py-4">Sin resultados.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-4">Sin resultados.</td></tr>
             <?php else: ?>
                 <?php foreach ($pacientes as $p): ?>
                 <tr>
@@ -51,6 +60,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
                     <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
                     <td><?= Security::e($p['nombre']) ?></td>
                     <td><span class="badge text-bg-secondary">Paquete <?= Security::e($p['paquete']) ?></span></td>
+                    <td class="text-muted small"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
                     <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
                     <td><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
                     <td>

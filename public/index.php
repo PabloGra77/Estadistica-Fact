@@ -38,6 +38,10 @@ match (true) {
 
     // Pacientes
     $uri === '/pacientes' && $method === 'GET'              => require BASE_PATH . '/app/Controllers/PacientesController.php',
+    $uri === '/pacientes/exportar' && $method === 'GET'     => require BASE_PATH . '/app/Controllers/PacientesController.php',
+    $uri === '/pacientes/importar' && $method === 'GET'     => require BASE_PATH . '/app/Controllers/PacientesController.php',
+    $uri === '/pacientes/importar' && $method === 'POST'    => require BASE_PATH . '/app/Controllers/PacientesController.php',
+    $uri === '/pacientes/importar/plantilla' && $method === 'GET' => require BASE_PATH . '/app/Controllers/PacientesController.php',
     $uri === '/pacientes/crear' && $method === 'GET'        => require BASE_PATH . '/app/Controllers/PacientesController.php',
     $uri === '/pacientes/crear' && $method === 'POST'       => require BASE_PATH . '/app/Controllers/PacientesController.php',
     preg_match('#^/pacientes/(\d+)/editar$#', $uri, $m) === 1 && $method === 'GET'  => require BASE_PATH . '/app/Controllers/PacientesController.php',
