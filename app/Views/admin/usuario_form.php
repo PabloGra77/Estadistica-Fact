@@ -7,7 +7,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
 $rolesNombres = [
     ROL_ADMINISTRADOR => 'Administrador',
     ROL_FACTURADOR    => 'Facturador',
-    ROL_EQUIPOPPL     => 'EquipoPPL',
+    ROL_EQUIPO_PPL    => 'EquipoPPL',
     ROL_ESTADISTICO   => 'Estadístico',
 ];
 ?>

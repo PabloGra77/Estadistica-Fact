@@ -2,9 +2,9 @@
 require BASE_PATH . '/app/Views/layout/header.php';
 ?>
 
-<div class="d-flex align-items-center justify-content-between mb-4">
+<div class="d-flex align-items-start align-items-sm-center justify-content-between mb-4 flex-column flex-sm-row gap-2">
     <h2 class="fw-bold mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>Pacientes</h2>
-    <div class="d-flex gap-2">
+    <div class="d-flex gap-2 flex-wrap">
         <a href="/pacientes/exportar" class="btn btn-outline-success btn-sm">
             <i class="bi bi-file-earmark-arrow-down me-1"></i>Descargar informe
         </a>
@@ -28,7 +28,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
 
 <!-- Buscador -->
 <form method="get" action="/pacientes" class="mb-3">
-    <div class="input-group input-group-sm" style="max-width:400px">
+    <div class="input-group input-group-sm">
         <input type="search" name="q" class="form-control" placeholder="Buscar por nombre o documento..."
                value="<?= Security::e($busqueda) ?>" maxlength="100"/>
         <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
@@ -40,13 +40,13 @@ require BASE_PATH . '/app/Views/layout/header.php';
         <table class="table table-hover align-middle small mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>#</th>
+                    <th class="d-none d-md-table-cell">#</th>
                     <th>Documento</th>
                     <th>Nombre</th>
-                    <th>Paquete</th>
-                    <th>NUI</th>
-                    <th>Atenciones</th>
-                    <th>Registrado</th>
+                    <th class="d-none d-sm-table-cell">Paquete</th>
+                    <th class="d-none d-lg-table-cell">NUI</th>
+                    <th class="d-none d-sm-table-cell">Atenciones</th>
+                    <th class="d-none d-lg-table-cell">Registrado</th>
                     <th></th>
                 </tr>
             </thead>
@@ -56,13 +56,13 @@ require BASE_PATH . '/app/Views/layout/header.php';
             <?php else: ?>
                 <?php foreach ($pacientes as $p): ?>
                 <tr>
-                    <td class="text-muted"><?= Security::e($p['id']) ?></td>
+                    <td class="text-muted d-none d-md-table-cell"><?= Security::e($p['id']) ?></td>
                     <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
                     <td><?= Security::e($p['nombre']) ?></td>
-                    <td><span class="badge text-bg-secondary">Paquete <?= Security::e($p['paquete']) ?></span></td>
-                    <td class="text-muted small"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
-                    <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
-                    <td><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
+                    <td class="d-none d-sm-table-cell"><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
+                    <td class="text-muted small d-none d-lg-table-cell"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
+                    <td class="d-none d-sm-table-cell"><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
+                    <td class="d-none d-lg-table-cell"><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
                     <td>
                         <?php if (Auth::isAdmin() || Auth::isFacturador()): ?>
                         <a href="/pacientes/<?= (int)$p['id'] ?>/editar" class="btn btn-xs btn-outline-secondary">
