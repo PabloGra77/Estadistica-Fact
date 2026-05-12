@@ -35,15 +35,15 @@ require BASE_PATH . '/app/Views/layout/header.php';
     </div>
 </form>
 
-<div class="card border-0 shadow-sm">
-        <table class="table table-hover align-middle small mb-0" style="table-layout:fixed;width:100%">
+<div class="card border-0 shadow-sm" style="overflow:hidden">
+        <table class="table table-hover align-middle small mb-0">
             <thead class="table-light">
                 <tr>
                     <th style="width:55px">#</th>
                     <th style="width:130px">Documento</th>
                     <th>Nombre</th>
-                    <th style="width:80px">Paquete</th>
-                    <th style="width:85px">Atenciones</th>
+                    <th style="width:90px">Paquete</th>
+                    <th style="width:90px">Atenciones</th>
                     <th style="width:44px"></th>
                 </tr>
             </thead>
@@ -54,8 +54,8 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 <?php foreach ($pacientes as $p): ?>
                 <tr>
                     <td class="text-muted"><?= Security::e($p['id']) ?></td>
-                    <td class="fw-medium" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['documento']) ?></td>
-                    <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['nombre']) ?></td>
+                    <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
+                    <td><?= Security::e($p['nombre']) ?></td>
                     <td><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
                     <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
                     <td>
