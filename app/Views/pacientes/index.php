@@ -1,0 +1,84 @@
+<?php $pageTitle = 'Pacientes — PPL';
+require BASE_PATH . '/app/Views/layout/header.php';
+?>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold mb-0"><i class="bi bi-people-fill me-2 text-primary"></i>Pacientes</h2>
+    <?php if (Auth::isAdmin() || Auth::isFacturador() || Auth::isEquipoPPL()): ?>
+    <a href="/pacientes/crear" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i>Nuevo paciente
+    </a>
+    <?php endif; ?>
+</div>
+
+<?php if (!empty($_GET['ok'])): ?>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <?= Security::e((int)$_GET['ok'] === 1 ? 'Paciente creado correctamente.' : 'Paciente actualizado.') ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<?php endif; ?>
+
+<!-- Buscador -->
+<form method="get" action="/pacientes" class="mb-3">
+    <div class="input-group input-group-sm" style="max-width:400px">
+        <input type="search" name="q" class="form-control" placeholder="Buscar por nombre o documento..."
+               value="<?= Security::e($busqueda) ?>" maxlength="100"/>
+        <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+    </div>
+</form>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle small mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Documento</th>
+                    <th>Nombre</th>
+                    <th>Paquete</th>
+                    <th>Atenciones</th>
+                    <th>Registrado</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php if (empty($pacientes)): ?>
+                <tr><td colspan="7" class="text-center text-muted py-4">Sin resultados.</td></tr>
+            <?php else: ?>
+                <?php foreach ($pacientes as $p): ?>
+                <tr>
+                    <td class="text-muted"><?= Security::e($p['id']) ?></td>
+                    <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
+                    <td><?= Security::e($p['nombre']) ?></td>
+                    <td><span class="badge text-bg-secondary">Paquete <?= Security::e($p['paquete']) ?></span></td>
+                    <td><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
+                    <td><?= Security::e(date('d/m/Y', strtotime($p['fecha_creacion']))) ?></td>
+                    <td>
+                        <?php if (Auth::isAdmin() || Auth::isFacturador()): ?>
+                        <a href="/pacientes/<?= (int)$p['id'] ?>/editar" class="btn btn-xs btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paginación -->
+<?php if ($totalPaginas > 1): ?>
+<nav class="mt-3">
+    <ul class="pagination pagination-sm justify-content-center">
+        <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
+        <li class="page-item <?= $i === $pagina ? 'active' : '' ?>">
+            <a class="page-link" href="/pacientes?q=<?= urlencode($busqueda) ?>&p=<?= $i ?>"><?= $i ?></a>
+        </li>
+        <?php endfor; ?>
+    </ul>
+</nav>
+<?php endif; ?>
+
+<?php require BASE_PATH . '/app/Views/layout/footer.php'; ?>

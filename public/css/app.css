@@ -1,0 +1,313 @@
+/* ============================================================
+   Tablero PPL — app.css
+   ============================================================ */
+
+/* ── Variables ─────────────────────────────────────── */
+:root {
+    --sidebar-width: 260px;
+    --sidebar-bg: #0d1f4e;
+    --sidebar-text: #c8d5f0;
+    --sidebar-hover-bg: rgba(255,255,255,.07);
+    --sidebar-active-bg: rgba(255,255,255,.13);
+    --brand-accent: #3b82f6;
+    --topbar-height: 0px;
+}
+
+/* ── Layout base ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* ── Sidebar ────────────────────────────────────────── */
+#sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    z-index: 1040;
+    overflow-y: auto;
+    transition: transform .25s ease;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    text-decoration: none;
+}
+
+.sidebar-brand-logo {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    background: var(--brand-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1rem; color: #fff;
+    letter-spacing: .05rem;
+    flex-shrink: 0;
+}
+
+.sidebar-brand-name {
+    line-height: 1.2;
+}
+
+.sidebar-brand-name strong {
+    display: block;
+    font-size: .9rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.sidebar-brand-name small {
+    font-size: .72rem;
+    color: var(--sidebar-text);
+}
+
+/* Nav items */
+.sidebar-nav {
+    flex: 1;
+    padding: .75rem 0;
+    list-style: none;
+    margin: 0;
+}
+
+.sidebar-nav .nav-section {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .08rem;
+    color: rgba(200,213,240,.45);
+    padding: .75rem 1.25rem .25rem;
+    font-weight: 600;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem 1.25rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: .875rem;
+    border-radius: 0;
+    transition: background .15s, color .15s;
+}
+
+.sidebar-nav .nav-link i {
+    font-size: 1rem;
+    width: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.sidebar-nav .nav-link:hover {
+    background: var(--sidebar-hover-bg);
+    color: #fff;
+}
+
+.sidebar-nav .nav-link.active {
+    background: var(--sidebar-active-bg);
+    color: #fff;
+    font-weight: 600;
+    border-left: 3px solid var(--brand-accent);
+}
+
+/* User panel */
+.user-panel {
+    padding: .9rem 1.25rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+
+.user-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--brand-accent);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-weight: 700; font-size: .85rem;
+    flex-shrink: 0;
+}
+
+.user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.user-info .user-name {
+    font-size: .8rem;
+    color: #fff;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-info .user-email {
+    font-size: .72rem;
+    color: var(--sidebar-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Role badges */
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .7rem;
+    font-weight: 600;
+    padding: .2rem .55rem;
+    border-radius: 99px;
+    border: 1px solid;
+}
+.role-badge-admin       { color: #60a5fa; border-color: #60a5fa; }
+.role-badge-facturador  { color: #34d399; border-color: #34d399; }
+.role-badge-equipoppl   { color: #fbbf24; border-color: #fbbf24; }
+.role-badge-estadistico { color: #a78bfa; border-color: #a78bfa; }
+
+/* ── Content wrapper ────────────────────────────────── */
+#content-wrapper {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    padding: 2rem 1.75rem;
+}
+
+/* ── Stat cards ─────────────────────────────────────── */
+.stat-icon {
+    width: 52px; height: 52px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #1e293b;
+}
+
+.stat-label {
+    font-size: .75rem;
+    color: #64748b;
+    margin-top: .15rem;
+}
+
+/* ── Tables ─────────────────────────────────────────── */
+.table { font-size: .875rem; }
+.table th { font-size: .8rem; font-weight: 600; color: #475569; }
+
+/* ── Buttons xs ─────────────────────────────────────── */
+.btn-xs {
+    padding: .15rem .4rem;
+    font-size: .75rem;
+    border-radius: .25rem;
+}
+
+/* ── Cards ──────────────────────────────────────────── */
+.card { border-radius: .75rem; }
+.card-header { border-radius: .75rem .75rem 0 0 !important; font-size: .875rem; }
+
+/* ── Alerts ─────────────────────────────────────────── */
+.alert-sm { font-size: .85rem; }
+
+/* ── Mobile sidebar toggle ──────────────────────────── */
+#sidebarToggle {
+    display: none;
+    position: fixed;
+    top: .75rem; left: .75rem;
+    z-index: 1050;
+    background: var(--sidebar-bg);
+    color: #fff;
+    border: none;
+    border-radius: .4rem;
+    padding: .35rem .5rem;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    #sidebarToggle { display: block; }
+    #sidebar { transform: translateX(calc(-1 * var(--sidebar-width))); }
+    #sidebar.show { transform: translateX(0); }
+    #content-wrapper { margin-left: 0; padding: 1rem; padding-top: 3.5rem; }
+}
+
+/* ── Scrollbar sidebar ──────────────────────────────── */
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+
+/* ── Header brand aliases ───────────────────────────── */
+.brand-ppl {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .05rem;
+}
+.brand-sub {
+    font-size: .7rem;
+    color: var(--sidebar-text);
+    display: block;
+}
+
+/* ── Nav item alias (header uses .nav-item) ─────────── */
+.sidebar-nav .nav-item,
+.sidebar-nav a.nav-item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem 1.25rem;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: .875rem;
+    transition: background .15s, color .15s;
+}
+.sidebar-nav .nav-item i {
+    font-size: 1rem;
+    width: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+.sidebar-nav .nav-item:hover {
+    background: var(--sidebar-hover-bg);
+    color: #fff;
+}
+.sidebar-nav .nav-item.active {
+    background: var(--sidebar-active-bg);
+    color: #fff;
+    font-weight: 600;
+    border-left: 3px solid var(--brand-accent);
+}
+.sidebar-nav .nav-section {
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .08rem;
+    color: rgba(200,213,240,.45);
+    padding: .75rem 1.25rem .25rem;
+    font-weight: 600;
+}
+
+/* ── Logout button ──────────────────────────────────── */
+.logout-form { margin: 0; }
+.btn-logout {
+    background: none;
+    border: none;
+    color: var(--sidebar-text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: .25rem;
+    border-radius: .35rem;
+    transition: color .15s, background .15s;
+}
+.btn-logout:hover { color: #f87171; background: rgba(248,113,113,.12); }

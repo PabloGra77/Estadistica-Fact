@@ -1,0 +1,56 @@
+Options -Indexes
+Options -MultiViews
+
+# ── Reescritura de URLs ───────────────────────────────────────────────────────
+# Toda la app vive en public/ como document root.
+# config/, app/, storage/, sql/ están FUERA del webroot (sin acceso HTTP).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Forzar HTTPS
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # No reescribir archivos/carpetas reales (css, js, img...)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Todo lo demás va al front controller
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>
+
+# ── Seguridad HTTP ────────────────────────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Eliminar cabeceras que revelan tecnología del servidor
+    Header unset X-Powered-By
+    Header always unset X-Powered-By
+</IfModule>
+
+# ── Ocultar firma del servidor ────────────────────────────────────────────────
+ServerSignature Off
+
+# ── Caché de assets estáticos ─────────────────────────────────────────────────
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|woff2|woff|ttf)$">
+    <IfModule mod_expires.c>
+        ExpiresActive On
+        ExpiresDefault "access plus 1 month"
+    </IfModule>
+    <IfModule mod_headers.c>
+        Header append Cache-Control "public, immutable"
+    </IfModule>
+</FilesMatch>
+
+# ── Comprimir respuestas ──────────────────────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json
+</IfModule>
+
+# Negar acceso a archivos ocultos (.htpasswd, .git, etc.)
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

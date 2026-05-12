@@ -1,0 +1,46 @@
+# =============================================================================
+# .gitignore — Tablero PPL
+# =============================================================================
+
+# Credenciales y configuración local
+.env
+
+# Dependencias Composer
+/vendor/
+
+# Archivos subidos por usuarios
+/storage/soportes/*
+!/storage/soportes/.gitkeep
+
+# Logs
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Temporales
+/storage/temp/*
+!/storage/temp/.gitkeep
+
+# SQL de producción (contiene hashes de contraseñas)
+/sql/seed.sql
+
+# Backups y comprimidos
+*.zip
+*.tar.gz
+*.bak
+*.sql.bak
+
+# Editores
+.vscode/settings.json
+.idea/
+*.swp
+*~
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# PHP opcache
+*.cache
+
+# Logs del sistema
+*.log

@@ -1,0 +1,23 @@
+{
+    "name": "ipsgoleman/tablero-atenciones",
+    "description": "Tablero de Atenciones PPL — IPS Goleman Servicio Integral S.A.S.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {},
+    "autoload": {
+        "psr-4": {
+            "App\\Controllers\\": "app/Controllers/",
+            "App\\Core\\": "app/Core/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "seed": "php sql/generate_seed.php > sql/seed.sql && echo Seed generado."
+    }
+}
