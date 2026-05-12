@@ -46,6 +46,61 @@ if ($uri === '/atenciones' && $method === 'GET') {
     );
 
     $totalPaginas = (int)ceil($total / $porPagina);
+
+    // ── Tablero de cobertura ──────────────────────────────────────────────────
+    $chartMes  = $filtroMes  !== null ? $filtroMes  : (int)date('n');
+    $chartAnio = $filtroAnio !== null ? $filtroAnio : (int)date('Y');
+
+    $coberturaRows = Database::fetchAll(
+        "SELECT p.id AS pid, p.documento, p.nombre,
+                a.servicio,
+                COUNT(s.id) AS con_soporte
+         FROM Atenciones a
+         JOIN Pacientes p ON p.id = a.paciente_id
+         LEFT JOIN Soportes s ON s.atencion_id = a.id
+         WHERE a.mes_atencion = ? AND a.anio_atencion = ?
+           AND p.activo = 1
+         GROUP BY p.id, p.documento, p.nombre, a.servicio
+         ORDER BY p.nombre, a.servicio",
+        [$chartMes, $chartAnio]
+    );
+
+    $matrizCobertura = [];
+    $servicioStats   = array_fill(0, count(TIPOS_SERVICIO), ['con' => 0, 'sin' => 0]);
+
+    foreach ($coberturaRows as $r) {
+        $pid = $r['pid'];
+        if (!isset($matrizCobertura[$pid])) {
+            $matrizCobertura[$pid] = [
+                'nombre'    => $r['nombre'],
+                'documento' => $r['documento'],
+                'servicios' => [],
+            ];
+        }
+        $svc = (int)$r['servicio'];
+        $matrizCobertura[$pid]['servicios'][$svc] = (int)$r['con_soporte'];
+        if ((int)$r['con_soporte'] > 0) $servicioStats[$svc]['con']++;
+        else                             $servicioStats[$svc]['sin']++;
+    }
+
+    // Estadísticas globales del tablero
+    $totalPacientesChart  = count($matrizCobertura);
+    $conCoberturaCompleta = 0;
+    $conCoberturaTotal    = 0; // al menos un soporte
+    $totalSoportesChart   = 0;
+    $totalAtencionesChart = 0;
+    foreach ($matrizCobertura as $px) {
+        $tieneSoporte = false;
+        $todosConSoporte = true;
+        foreach ($px['servicios'] as $cnt) {
+            $totalAtencionesChart++;
+            if ($cnt > 0) { $tieneSoporte = true; $totalSoportesChart += $cnt; }
+            else          { $todosConSoporte = false; }
+        }
+        if ($tieneSoporte)       $conCoberturaTotal++;
+        if ($tieneSoporte && $todosConSoporte) $conCoberturaCompleta++;
+    }
+
     require BASE_PATH . '/app/Views/atenciones/index.php';
     exit;
 }
