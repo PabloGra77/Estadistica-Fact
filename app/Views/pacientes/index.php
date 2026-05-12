@@ -36,27 +36,17 @@ require BASE_PATH . '/app/Views/layout/header.php';
 </form>
 
 <div class="card border-0 shadow-sm">
-        <table class="table table-hover align-middle small mb-0" style="table-layout:fixed;width:100%">
-            <colgroup>
-                <col class="d-none d-md-table-cell" style="width:60px">
-                <col style="width:120px">
-                <col>
-                <col class="d-none d-sm-table-cell" style="width:90px">
-                <col class="d-none d-lg-table-cell" style="width:90px">
-                <col class="d-none d-sm-table-cell" style="width:90px">
-                <col class="d-none d-lg-table-cell" style="width:90px">
-                <col style="width:48px">
-            </colgroup>
+        <table class="table table-hover align-middle small mb-0 w-100">
             <thead class="table-light">
                 <tr>
-                    <th class="d-none d-md-table-cell">#</th>
-                    <th>Documento</th>
-                    <th>Nombre</th>
-                    <th class="d-none d-sm-table-cell">Paquete</th>
-                    <th class="d-none d-lg-table-cell">NUI</th>
-                    <th class="d-none d-sm-table-cell">Atenciones</th>
-                    <th class="d-none d-lg-table-cell">Registrado</th>
-                    <th></th>
+                    <th class="d-none d-md-table-cell" style="width:55px">#</th>
+                    <th style="width:120px">Documento</th>
+                    <th style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Nombre</th>
+                    <th class="d-none d-sm-table-cell" style="width:85px">Paquete</th>
+                    <th class="d-none d-lg-table-cell" style="width:85px">NUI</th>
+                    <th class="d-none d-sm-table-cell" style="width:85px">Atenciones</th>
+                    <th class="d-none d-lg-table-cell" style="width:90px">Registrado</th>
+                    <th style="width:44px"></th>
                 </tr>
             </thead>
             <tbody>
@@ -66,8 +56,8 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 <?php foreach ($pacientes as $p): ?>
                 <tr>
                     <td class="text-muted d-none d-md-table-cell"><?= Security::e($p['id']) ?></td>
-                    <td class="fw-medium text-truncate"><?= Security::e($p['documento']) ?></td>
-                    <td class="text-truncate"><?= Security::e($p['nombre']) ?></td>
+                    <td class="fw-medium"><?= Security::e($p['documento']) ?></td>
+                    <td style="max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= Security::e($p['nombre']) ?></td>
                     <td class="d-none d-sm-table-cell"><span class="badge text-bg-secondary">Paq. <?= Security::e($p['paquete']) ?></span></td>
                     <td class="text-muted small d-none d-lg-table-cell"><?= $p['nui'] ? Security::e($p['nui']) : '<span class="text-muted">—</span>' ?></td>
                     <td class="d-none d-sm-table-cell"><span class="badge text-bg-info text-dark"><?= Security::e($p['num_atenciones']) ?></span></td>
