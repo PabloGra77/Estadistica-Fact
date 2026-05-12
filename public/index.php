@@ -53,9 +53,11 @@ match (true) {
     $uri === '/atenciones/crear' && $method === 'POST'      => require BASE_PATH . '/app/Controllers/AtencionesController.php',
 
     // Soportes
-    $uri === '/soportes' && $method === 'GET'               => require BASE_PATH . '/app/Controllers/SoportesController.php',
-    $uri === '/soportes/subir' && $method === 'GET'         => require BASE_PATH . '/app/Controllers/SoportesController.php',
-    $uri === '/soportes/subir' && $method === 'POST'        => require BASE_PATH . '/app/Controllers/SoportesController.php',
+    $uri === '/soportes' && $method === 'GET'                       => require BASE_PATH . '/app/Controllers/SoportesController.php',
+    $uri === '/soportes/subir' && $method === 'GET'                 => require BASE_PATH . '/app/Controllers/SoportesController.php',
+    $uri === '/soportes/subir' && $method === 'POST'                => require BASE_PATH . '/app/Controllers/SoportesController.php',
+    $uri === '/soportes/importar-zip' && $method === 'GET'          => require BASE_PATH . '/app/Controllers/SoportesController.php',
+    $uri === '/soportes/importar-zip' && $method === 'POST'         => require BASE_PATH . '/app/Controllers/SoportesController.php',
     preg_match('#^/soportes/(\d+)/descargar$#', $uri, $m) === 1 => require BASE_PATH . '/app/Controllers/SoportesController.php',
     preg_match('#^/soportes/(\d+)/auditar$#',   $uri, $m) === 1 && $method === 'POST' => require BASE_PATH . '/app/Controllers/SoportesController.php',
 

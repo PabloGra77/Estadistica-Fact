@@ -176,3 +176,207 @@ if ($soporteId !== null && $sAction === 'auditar' && $method === 'POST') {
     header('Location: /soportes?ok=2');
     exit;
 }
+
+// ── GET/POST /soportes/importar-zip ──────────────────────────────────────────
+if ($uri === '/soportes/importar-zip') {
+    Auth::requireRole(ROL_ADMINISTRADOR, ROL_FACTURADOR, ROL_EQUIPO_PPL);
+
+    $resultados = [];
+    $procesados = 0;
+    $errores    = 0;
+    $completado = false;
+    $anio = (int)date('Y');
+    $mes  = (int)date('n');
+
+    /** Borra un directorio y todo su contenido de forma recursiva */
+    $borrarDir = function (string $dir) use (&$borrarDir): void {
+        foreach (glob($dir . '/{,.}*', GLOB_BRACE) as $item) {
+            if (in_array(basename($item), ['.', '..'], true)) continue;
+            is_dir($item) ? $borrarDir($item) : @unlink($item);
+        }
+        @rmdir($dir);
+    };
+
+    if ($method === 'POST') {
+        Security::verifyCsrf();
+
+        $file      = $_FILES['zip_soportes'] ?? null;
+        $zipErrors = [];
+
+        if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
+            $zipErrors[] = 'Seleccione un archivo ZIP.';
+        } elseif ($file['error'] !== UPLOAD_ERR_OK) {
+            $codigos = [
+                UPLOAD_ERR_INI_SIZE   => 'El archivo supera upload_max_filesize del servidor.',
+                UPLOAD_ERR_FORM_SIZE  => 'El archivo supera MAX_FILE_SIZE del formulario.',
+                UPLOAD_ERR_PARTIAL    => 'El archivo se subió parcialmente.',
+            ];
+            $zipErrors[] = $codigos[$file['error']] ?? 'Error al subir el archivo (código ' . (int)$file['error'] . ').';
+        } else {
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if ($ext !== 'zip') {
+                $zipErrors[] = 'Solo se aceptan archivos .zip.';
+            } else {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime  = finfo_file($finfo, $file['tmp_name']);
+                finfo_close($finfo);
+                $mimesPermitidos = ['application/zip', 'application/x-zip-compressed',
+                                    'application/x-zip', 'application/octet-stream'];
+                if (!in_array($mime, $mimesPermitidos, true)) {
+                    $zipErrors[] = 'El archivo no tiene un formato ZIP válido (MIME: ' . htmlspecialchars($mime) . ').';
+                }
+            }
+        }
+
+        if (empty($zipErrors)) {
+            $zip = new ZipArchive();
+            $res = $zip->open($file['tmp_name']);
+            if ($res !== true) {
+                $zipErrors[] = 'No se pudo abrir el ZIP (código ' . $res . '). Verifique que no esté dañado.';
+            } else {
+                // Extraer a carpeta temporal segura
+                $tmpDir = sys_get_temp_dir() . '/ppl_zip_' . bin2hex(random_bytes(8));
+                mkdir($tmpDir, 0700, true);
+                $zip->extractTo($tmpDir);
+                $zip->close();
+
+                // Mapeo código → índice numérico de servicio
+                $mapaServicios = array_flip(TIPOS_SERVICIO); // ['VALPS'=>0,'VALPQ'=>1,...]
+
+                // Detectar directorio base: ZIP puede incluir carpeta raíz extra
+                $dirs = glob($tmpDir . '/*', GLOB_ONLYDIR);
+                $baseDir = $tmpDir;
+                if (count($dirs) === 1) {
+                    $innerDirs  = glob($dirs[0] . '/*', GLOB_ONLYDIR);
+                    $innerPdfs  = array_merge(
+                        glob($dirs[0] . '/*.pdf') ?: [],
+                        glob($dirs[0] . '/*.PDF') ?: []
+                    );
+                    if (!empty($innerDirs) && empty($innerPdfs)) {
+                        // La raíz del ZIP es una carpeta contenedora → entrar un nivel
+                        $baseDir = $dirs[0];
+                        $dirs    = $innerDirs;
+                    }
+                }
+
+                $username = Auth::username();
+
+                foreach ($dirs as $pacienteDir) {
+                    $docPaciente = basename($pacienteDir);
+
+                    // Ignorar artefactos de macOS
+                    if ($docPaciente === '__MACOSX' || str_starts_with($docPaciente, '.')) continue;
+
+                    $paciente = Database::fetchOne(
+                        "SELECT id, nombre FROM Pacientes WHERE documento=? AND activo=1",
+                        [$docPaciente]
+                    );
+
+                    $pdfs = array_merge(
+                        glob($pacienteDir . '/*.pdf') ?: [],
+                        glob($pacienteDir . '/*.PDF') ?: []
+                    );
+
+                    if (empty($pdfs)) {
+                        $resultados[] = ['tipo' => 'warning',
+                            'msg' => "Carpeta «{$docPaciente}»: no contiene archivos PDF — omitida."];
+                        $errores++;
+                        continue;
+                    }
+
+                    foreach ($pdfs as $pdfPath) {
+                        $base    = pathinfo($pdfPath, PATHINFO_FILENAME);  // sin extensión
+                        $ext     = strtolower(pathinfo($pdfPath, PATHINFO_EXTENSION));
+                        $original = basename($pdfPath);
+
+                        // Código de servicio: todo lo que hay tras el último '_'
+                        $partes  = explode('_', $base);
+                        $codigo  = strtoupper(end($partes));
+
+                        if (!isset($mapaServicios[$codigo])) {
+                            $resultados[] = ['tipo' => 'danger',
+                                'msg' => "«{$original}»: código de servicio «{$codigo}» no reconocido — omitido."];
+                            $errores++;
+                            continue;
+                        }
+
+                        if (!$paciente) {
+                            $resultados[] = ['tipo' => 'danger',
+                                'msg' => "«{$original}»: paciente con documento «{$docPaciente}» no encontrado — omitido."];
+                            $errores++;
+                            continue;
+                        }
+
+                        $servicioInt = $mapaServicios[$codigo];
+                        $pacienteId  = (int)$paciente['id'];
+
+                        // Obtener o crear Atencion para este paciente+servicio+mes+año
+                        $atencion = Database::fetchOne(
+                            "SELECT id FROM Atenciones
+                             WHERE paciente_id=? AND servicio=? AND anio_atencion=? AND mes_atencion=?",
+                            [$pacienteId, $servicioInt, $anio, $mes]
+                        );
+                        if ($atencion) {
+                            $atencionId = (int)$atencion['id'];
+                        } else {
+                            $atencionId = (int)Database::insert(
+                                "INSERT INTO Atenciones (paciente_id, servicio, anio_atencion, mes_atencion)
+                                 VALUES (?,?,?,?)",
+                                [$pacienteId, $servicioInt, $anio, $mes]
+                            );
+                        }
+
+                        // Duplicado por hash
+                        $hash = hash_file('sha256', $pdfPath);
+                        if (Database::fetchOne("SELECT id FROM Soportes WHERE hash_sha256=?", [$hash])) {
+                            $resultados[] = ['tipo' => 'warning',
+                                'msg' => "«{$original}»: ya cargado anteriormente — omitido."];
+                            continue;
+                        }
+
+                        // Guardar en STORAGE_PATH
+                        $nombreFisico = $hash . '_' . time() . '.' . $ext;
+                        $destino      = STORAGE_PATH . '/' . $nombreFisico;
+
+                        if (!copy($pdfPath, $destino)) {
+                            $resultados[] = ['tipo' => 'danger',
+                                'msg' => "«{$original}»: error al guardar el archivo — omitido."];
+                            $errores++;
+                            continue;
+                        }
+
+                        Database::insert(
+                            "INSERT INTO Soportes
+                             (atencion_id, nombre_original, nombre_fisico, hash_sha256, cargado_por)
+                             VALUES (?,?,?,?,?)",
+                            [$atencionId, mb_substr($original, 0, 500), $nombreFisico, $hash, $username]
+                        );
+
+                        $resultados[] = ['tipo' => 'success',
+                            'msg' => "«{$original}» → {$paciente['nombre']} | "
+                                   . TIPOS_SERVICIO[$servicioInt] . " — {$mes}/{$anio}"];
+                        $procesados++;
+                    }
+                }
+
+                // Limpiar temp
+                $borrarDir($tmpDir);
+
+                $completado = true;
+                if ($procesados > 0) {
+                    Auth::audit($username, 'ZIP_IMPORTADO',
+                        "Procesados: {$procesados} | Errores: {$errores}");
+                }
+            }
+        }
+
+        // Agregar errores de validación del ZIP al inicio
+        foreach (array_reverse($zipErrors) as $ze) {
+            array_unshift($resultados, ['tipo' => 'danger', 'msg' => $ze]);
+        }
+        $errores += count($zipErrors);
+    }
+
+    require BASE_PATH . '/app/Views/soportes/importar_zip.php';
+    exit;
+}
