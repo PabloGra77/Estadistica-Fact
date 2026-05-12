@@ -9,8 +9,11 @@ require BASE_PATH . '/app/Views/layout/header.php';
             <i class="bi bi-file-earmark-arrow-down me-1"></i>Descargar informe
         </a>
         <?php if (Auth::isAdmin() || Auth::isFacturador() || Auth::isEquipoPPL()): ?>
+        <a href="/pacientes/importar/plantilla" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i>Descargar plantilla
+        </a>
         <a href="/pacientes/importar" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-upload me-1"></i>Importar
+            <i class="bi bi-upload me-1"></i>Importar / Actualizar
         </a>
         <a href="/pacientes/crear" class="btn btn-primary btn-sm">
             <i class="bi bi-plus-lg me-1"></i>Nuevo paciente
