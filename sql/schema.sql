@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS Soportes (
     hash_sha256             CHAR(64)        NOT NULL,
     estado                  TINYINT UNSIGNED NOT NULL DEFAULT 0
                                 COMMENT '0=Pendiente 1=AprobadoAuto 2=AprobadoManual 3=Rechazado 4=Inconsistente',
-    texto_extraido          MEDIUMTEXT      NOT NULL DEFAULT '',
+    texto_extraido          MEDIUMTEXT      NOT NULL,
     requiere_ocr            TINYINT(1)      NOT NULL DEFAULT 0,
     fecha_carga             DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     cargado_por             VARCHAR(100)    NOT NULL,
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS AuditoriasAccion (
     id              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     nombre_usuario  VARCHAR(100)    NOT NULL,
     accion          VARCHAR(200)    NOT NULL,
-    detalle         TEXT            NOT NULL DEFAULT '',
+    detalle         TEXT            NOT NULL,
     fecha           DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ip              VARCHAR(45)     NOT NULL DEFAULT '',
     PRIMARY KEY (id),
