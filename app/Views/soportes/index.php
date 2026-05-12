@@ -7,14 +7,9 @@ $meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','
 <div class="d-flex align-items-center justify-content-between mb-4">
     <h2 class="fw-bold mb-0"><i class="bi bi-file-earmark-text-fill me-2" style="color:#7c3aed"></i>Soportes</h2>
     <?php if (!Auth::isEstadistico()): ?>
-    <div class="d-flex gap-2">
-        <a href="/soportes/importar-zip" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-file-zip me-1"></i>Importar ZIP
-        </a>
-        <a href="/soportes/subir" class="btn btn-sm btn-primary">
-            <i class="bi bi-upload me-1"></i>Subir soporte
-        </a>
-    </div>
+    <a href="/soportes/importar-zip" class="btn btn-sm btn-primary">
+        <i class="bi bi-upload me-1"></i>Subir soportes (ZIP)
+    </a>
     <?php endif; ?>
 </div>
 
