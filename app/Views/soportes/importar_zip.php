@@ -24,7 +24,7 @@ require BASE_PATH . '/app/Views/layout/header.php'; ?>
 │   ├── 872394723ERR_VALPS.pdf   ← Valoración Inicial Psicología
 │   └── 872394723ERR_PQ.pdf      ← Evolución Psiquiatría
 ├── 1006526333/
-│   └── 1006526333_TF.pdf        ← Trabajo Social/Familiar
+│   └── 1006526333_TS.pdf        ← Trabajo Social
 └── ...</pre>
         <p class="mb-1 small fw-semibold">Códigos de servicio válidos:</p>
         <div class="row g-2 mb-3">
@@ -34,8 +34,8 @@ require BASE_PATH . '/app/Views/layout/header.php'; ?>
                 'VALPQ' => 'Valoración Inicial Psiquiatría',
                 'PS'    => 'Evolución Psicología',
                 'PQ'    => 'Evolución Psiquiatría',
-                'TF'    => 'Trabajo Social / Familiar',
-                'TS'    => 'Terapia Sistémica',
+                'TF'    => 'Terapia Física / Fisioterapia',
+                'TS'    => 'Trabajo Social',
             ];
             foreach (TIPOS_SERVICIO as $idx => $codigo): ?>
             <div class="col-6 col-md-4 col-lg-3">
