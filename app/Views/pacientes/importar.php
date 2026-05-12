@@ -71,10 +71,11 @@ $importResult ??= null;
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td class="fw-medium">Documento (CC)</td><td>Número de cédula</td><td>12345678</td></tr>
+                            <tr><td class="fw-medium">Documento (CC)</td><td>Letras, números o combinación</td><td>12345678 o AB12CD</td></tr>
                             <tr><td class="fw-medium">Nombre completo</td><td>Apellidos y nombres</td><td>PEREZ JUAN</td></tr>
                             <tr><td class="fw-medium">Paquete</td><td>1 o 2</td><td>1</td></tr>
                             <tr><td class="fw-medium">NUI</td><td>Número único interno (opcional)</td><td>NUI-0023</td></tr>
+                            <tr><td class="fw-medium">Fecha Nacimiento</td><td>dd/mm/yyyy (opcional)</td><td>15/06/1985</td></tr>
                         </tbody>
                     </table>
                 </div>

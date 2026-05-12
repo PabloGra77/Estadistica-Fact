@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS Pacientes (
     paquete         TINYINT UNSIGNED NOT NULL DEFAULT 1
                         COMMENT '1=Paquete1 2=Paquete2',
     nui             VARCHAR(30)     NULL DEFAULT NULL,
+    fecha_nacimiento DATE            NULL DEFAULT NULL,
     activo          TINYINT(1)      NOT NULL DEFAULT 1,
     fecha_creacion  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),

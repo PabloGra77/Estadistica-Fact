@@ -1,7 +1,14 @@
 <?php
 $modoEditar ??= false;
-$values     ??= ['documento' => '', 'nombre' => '', 'paquete' => 1, 'nui' => '', 'activo' => 1];
+$values     ??= ['documento' => '', 'nombre' => '', 'paquete' => 1, 'nui' => '', 'fecha_nacimiento' => '', 'activo' => 1];
 $errors     ??= [];
+// Calcular edad si hay fecha de nacimiento
+$edadTexto = '';
+if (!empty($values['fecha_nacimiento'])) {
+    $fnac = new DateTime($values['fecha_nacimiento']);
+    $hoy  = new DateTime();
+    $edadTexto = $fnac->diff($hoy)->y . ' años';
+}
 $pageTitle = ($modoEditar ? 'Editar' : 'Nuevo') . ' Paciente — PPL';
 require BASE_PATH . '/app/Views/layout/header.php';
 ?>
@@ -49,6 +56,18 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 <input type="text" id="nui" name="nui" class="form-control form-control-sm"
                        value="<?= Security::e($values['nui'] ?? '') ?>"
                        maxlength="30" placeholder="Número único interno" />
+            </div>
+
+            <div class="mb-3">
+                <label for="fecha_nacimiento" class="form-label fw-semibold small">Fecha de nacimiento <span class="text-muted fw-normal">(opcional)</span></label>
+                <div class="input-group input-group-sm">
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" class="form-control form-control-sm"
+                           value="<?= Security::e($values['fecha_nacimiento'] ?? '') ?>"
+                           max="<?= date('Y-m-d') ?>" />
+                    <?php if ($edadTexto): ?>
+                    <span class="input-group-text text-muted"><?= Security::e($edadTexto) ?></span>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <?php if ($modoEditar): ?>
