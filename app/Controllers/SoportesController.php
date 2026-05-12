@@ -57,73 +57,7 @@ if ($uri === '/soportes' && $method === 'GET') {
 
 // ── GET/POST /soportes/subir ──────────────────────────────────────────────────
 if ($uri === '/soportes/subir') {
-    Auth::requireRole(ROL_ADMINISTRADOR, ROL_FACTURADOR, ROL_EQUIPO_PPL);
-
-    $errors = [];
-    $values = ['atencion_id' => ''];
-    $atenciones = Database::fetchAll(
-        "SELECT a.id, p.nombre, p.documento, a.servicio, a.mes_atencion, a.anio_atencion
-         FROM Atenciones a JOIN Pacientes p ON p.id=a.paciente_id
-         ORDER BY a.fecha_carga DESC LIMIT 200"
-    );
-
-    if ($method === 'POST') {
-        Security::verifyCsrf();
-
-        $atencionId = Security::validateInt($_POST['atencion_id'] ?? '', 1);
-        if ($atencionId === null) $errors[] = 'Seleccione una atención.';
-
-        $file = $_FILES['soporte'] ?? null;
-        if (!$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
-            $errors[] = 'Seleccione un archivo.';
-        } elseif ($file) {
-            $valid = Security::validateUpload($file);
-            if (!$valid['ok']) $errors[] = $valid['error'];
-        }
-
-        if (empty($errors)) {
-            // Verificar que la atención existe
-            $atencion = Database::fetchOne("SELECT id FROM Atenciones WHERE id=?", [$atencionId]);
-            if (!$atencion) { $errors[] = 'Atención no encontrada.'; }
-        }
-
-        if (empty($errors)) {
-            $hash        = hash_file('sha256', $file['tmp_name']);
-            $ext         = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $nombreFisico = $hash . '_' . time() . '.' . $ext;
-            $destino     = STORAGE_PATH . '/' . $nombreFisico;
-
-            // Verificar duplicado por hash
-            $dup = Database::fetchOne("SELECT id FROM Soportes WHERE hash_sha256=?", [$hash]);
-            if ($dup) {
-                $errors[] = 'Este archivo ya fue cargado anteriormente (hash duplicado).';
-            } else {
-                if (!move_uploaded_file($file['tmp_name'], $destino)) {
-                    $errors[] = 'Error al guardar el archivo. Contacte al administrador.';
-                } else {
-                    Database::insert(
-                        "INSERT INTO Soportes
-                         (atencion_id, nombre_original, nombre_fisico, hash_sha256, cargado_por)
-                         VALUES (?,?,?,?,?)",
-                        [
-                            $atencionId,
-                            mb_substr($file['name'], 0, 500),
-                            $nombreFisico,
-                            $hash,
-                            Auth::username(),
-                        ]
-                    );
-                    Auth::audit(Auth::username(), 'SOPORTE_SUBIDO',
-                        "Atencion: $atencionId | Archivo: " . $file['name']);
-                    header('Location: /soportes?ok=1');
-                    exit;
-                }
-            }
-        }
-        $values['atencion_id'] = $_POST['atencion_id'] ?? '';
-    }
-
-    require BASE_PATH . '/app/Views/soportes/form.php';
+    header('Location: /soportes/importar-zip', true, 301);
     exit;
 }
 
