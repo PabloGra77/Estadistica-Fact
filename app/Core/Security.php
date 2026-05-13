@@ -24,11 +24,34 @@ class Security
     /** Valida el token CSRF enviado en el formulario. */
     public static function verifyCsrf(): void
     {
+        // Detectar cuando PHP descartó el POST por exceder post_max_size
+        $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+        $postMaxBytes  = self::parseBytes(ini_get('post_max_size'));
+        if ($contentLength > $postMaxBytes && empty($_POST)) {
+            $mb = round($contentLength / 1048576, 1);
+            http_response_code(413);
+            die('El archivo es demasiado grande (' . $mb . ' MB). El límite del servidor es ' . ini_get('post_max_size') . '. Contacte al administrador.');
+        }
+
         $token = $_POST['csrf_token'] ?? '';
         if (!hash_equals(self::csrfToken(), $token)) {
             http_response_code(403);
             die('Token de seguridad inválido. Recarga la página.');
         }
+    }
+
+    /** Convierte cadenas como "200M", "8M", "1G" a bytes. */
+    private static function parseBytes(string $val): int
+    {
+        $val  = trim($val);
+        $last = strtolower($val[-1] ?? '');
+        $num  = (int)$val;
+        return match ($last) {
+            'g' => $num * 1073741824,
+            'm' => $num * 1048576,
+            'k' => $num * 1024,
+            default => $num,
+        };
     }
 
     // ── Escape XSS ────────────────────────────────────────────────────────────
