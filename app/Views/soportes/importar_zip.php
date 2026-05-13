@@ -52,7 +52,6 @@ require BASE_PATH . '/app/Views/layout/header.php'; ?>
             <i class="bi bi-exclamation-triangle-fill me-1"></i>
             <strong>El documento del paciente debe existir en el sistema.</strong>
             Los archivos de pacientes no encontrados se omiten con una advertencia.
-            Las atenciones del mes/año actual se crean automáticamente si no existen.
         </div>
     </div>
 </div>
@@ -60,27 +59,88 @@ require BASE_PATH . '/app/Views/layout/header.php'; ?>
 <!-- Formulario -->
 <?php if (!$completado): ?>
 <div class="card border-0 shadow-sm mb-4">
-    <div class="card-body">
-        <form method="post" action="/soportes/importar-zip" enctype="multipart/form-data" class="row g-3">
-            <?= Security::csrfField() ?>
-            <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_MB * 1024 * 1024 ?>"/>
-
-            <div class="col-12">
-                <label class="form-label fw-semibold" for="zip_soportes">
-                    Seleccionar archivo ZIP
-                </label>
-                <input type="file" id="zip_soportes" name="zip_soportes"
-                       accept=".zip,application/zip"
-                       class="form-control" required/>
-                <div class="form-text">Tamaño máximo permitido: <?= MAX_UPLOAD_MB ?> MB</div>
-            </div>
-
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-upload me-1"></i>Procesar ZIP
+    <div class="card-header bg-white py-0 pt-1">
+        <ul class="nav nav-tabs card-header-tabs" id="tabModo" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tab-upload-btn" data-bs-toggle="tab"
+                        data-bs-target="#tab-upload" type="button" role="tab">
+                    <i class="bi bi-upload me-1"></i>Subir ZIP
+                    <span class="badge text-bg-secondary ms-1" style="font-size:.65rem">hasta ~200 MB</span>
                 </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tab-inbox-btn" data-bs-toggle="tab"
+                        data-bs-target="#tab-inbox" type="button" role="tab">
+                    <i class="bi bi-inbox-fill me-1"></i>Bandeja del servidor
+                    <span class="badge text-bg-success ms-1" style="font-size:.65rem">ZIPs grandes</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body tab-content">
+
+        <!-- Pestaña: Subir ZIP por HTTP -->
+        <div class="tab-pane fade show active" id="tab-upload" role="tabpanel">
+            <form method="post" action="/soportes/importar-zip" enctype="multipart/form-data" class="row g-3 mt-1">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="modo" value="upload"/>
+                <input type="hidden" name="MAX_FILE_SIZE" value="<?= MAX_UPLOAD_MB * 1024 * 1024 ?>"/>
+                <div class="col-12">
+                    <label class="form-label fw-semibold" for="zip_soportes">Seleccionar archivo ZIP</label>
+                    <input type="file" id="zip_soportes" name="zip_soportes"
+                           accept=".zip,application/zip" class="form-control" required/>
+                    <div class="form-text">Límite: <?= MAX_UPLOAD_MB ?> MB. Para ZIPs más grandes use la pestaña <strong>Bandeja del servidor</strong>.</div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload me-1"></i>Procesar ZIP
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pestaña: Bandeja de entrada (archivos grandes) -->
+        <div class="tab-pane fade" id="tab-inbox" role="tabpanel">
+            <div class="alert alert-info small mt-3 mb-3 py-2">
+                <i class="bi bi-lightbulb-fill me-1"></i>
+                <strong>Para ZIPs de varios GB</strong>, copie el archivo directamente a la carpeta de bandeja en el servidor:<br>
+                <code class="d-block mt-1"><?= Security::e(INBOX_PATH) ?></code>
+                <span class="d-block mt-1 text-muted">Puede hacerlo por red local, USB, o cualquier medio. El servidor procesa el ZIP sin moverlo ni descomprimirlo completamente.</span>
             </div>
-        </form>
+
+            <?php if (empty($inboxZips)): ?>
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-inbox display-5 d-block mb-2 opacity-25"></i>
+                La bandeja está vacía. Copie un archivo <code>.zip</code> a la carpeta indicada y recargue la página.
+            </div>
+            <?php else: ?>
+            <form method="post" action="/soportes/importar-zip" class="row g-3 mt-0">
+                <?= Security::csrfField() ?>
+                <input type="hidden" name="modo" value="inbox"/>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">ZIP disponible en la bandeja</label>
+                    <select name="zip_inbox" class="form-select" required>
+                        <option value="">— Seleccionar —</option>
+                        <?php foreach ($inboxZips as $zipPath):
+                            $nombre = basename($zipPath);
+                            $tamMB  = round(filesize($zipPath) / 1048576, 1);
+                        ?>
+                        <option value="<?= Security::e($nombre) ?>">
+                            <?= Security::e($nombre) ?> (<?= $tamMB ?> MB)
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="form-text">El archivo permanece en la bandeja después de procesar. Bórrelo manualmente cuando ya no lo necesite.</div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-gear-fill me-1"></i>Procesar desde bandeja
+                    </button>
+                </div>
+            </form>
+            <?php endif; ?>
+        </div>
+
     </div>
 </div>
 <?php endif; ?>

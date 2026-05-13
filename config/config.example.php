@@ -34,7 +34,8 @@ define('LOCKOUT_MINUTES',    15);
 
 // ── Almacenamiento de soportes (fuera del webroot) ────────────────────────────
 define('STORAGE_PATH', BASE_PATH . '/storage/soportes');
-define('MAX_UPLOAD_MB', 20);
+define('INBOX_PATH',   BASE_PATH . '/storage/inbox');
+define('MAX_UPLOAD_MB', 200);
 define('ALLOWED_MIME', ['application/pdf', 'image/jpeg', 'image/png', 'image/tiff']);
 define('ALLOWED_EXT',  ['pdf', 'jpg', 'jpeg', 'png', 'tif', 'tiff']);
 
@@ -104,7 +105,8 @@ define('LOCKOUT_MINUTES',   15);
 // ── Almacenamiento de soportes ────────────────────────────────────────────────
 // Fuera del webroot para evitar acceso directo a archivos subidos
 define('STORAGE_PATH', BASE_PATH . '/storage/soportes');
-define('MAX_UPLOAD_MB', 20);
+define('INBOX_PATH',   BASE_PATH . '/storage/inbox');
+define('MAX_UPLOAD_MB', 200);
 define('ALLOWED_MIME', ['application/pdf', 'image/jpeg', 'image/png', 'image/tiff']);
 define('ALLOWED_EXT',  ['pdf', 'jpg', 'jpeg', 'png', 'tif', 'tiff']);
 
