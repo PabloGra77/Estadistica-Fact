@@ -132,56 +132,83 @@ $tabActiva = ($_GET['tab'] ?? 'lista') === 'tablero' ? 'tablero' : 'lista';
 $pctCobertura = $totalPacientesChart > 0
     ? round($conCoberturaCompleta / $totalPacientesChart * 100) : 0;
 $sinNingun    = $totalPacientesChart - $conCoberturaTotal;
+$pctFacturacion = $totalFacturacionMax > 0
+    ? round($totalFacturacionEst / $totalFacturacionMax * 100) : 0;
 ?>
 <div class="row g-3 mb-4">
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-2">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
                 <div class="rounded-3 p-2 bg-primary bg-opacity-10">
                     <i class="bi bi-people-fill fs-4 text-primary"></i>
                 </div>
                 <div>
                     <div class="fs-3 fw-bold lh-1"><?= $totalPacientesChart ?></div>
-                    <div class="small text-muted">Pacientes en el período</div>
+                    <div class="small text-muted">Pacientes</div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-2">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
                 <div class="rounded-3 p-2 bg-success bg-opacity-10">
-                    <i class="bi bi-check-circle-fill fs-4 text-success"></i>
+                    <i class="bi bi-patch-check-fill fs-4 text-success"></i>
                 </div>
                 <div>
                     <div class="fs-3 fw-bold lh-1 text-success"><?= $conCoberturaCompleta ?></div>
-                    <div class="small text-muted">Cobertura completa</div>
+                    <div class="small text-muted">≥<?= PCT_CUMPLIMIENTO ?>% completo</div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-2">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
                 <div class="rounded-3 p-2 bg-warning bg-opacity-10">
                     <i class="bi bi-exclamation-circle-fill fs-4 text-warning"></i>
                 </div>
                 <div>
                     <div class="fs-3 fw-bold lh-1 text-warning"><?= $conCoberturaTotal - $conCoberturaCompleta ?></div>
-                    <div class="small text-muted">Cobertura parcial</div>
+                    <div class="small text-muted">Parcial</div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-3">
+    <div class="col-6 col-md-2">
         <div class="card border-0 shadow-sm h-100">
-            <div class="card-body d-flex align-items-center gap-3">
+            <div class="card-body d-flex align-items-center gap-3 py-3">
                 <div class="rounded-3 p-2 bg-danger bg-opacity-10">
                     <i class="bi bi-x-circle-fill fs-4 text-danger"></i>
                 </div>
                 <div>
                     <div class="fs-3 fw-bold lh-1 text-danger"><?= $sinNingun ?></div>
                     <div class="small text-muted">Sin soportes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-muted small mb-1">Facturación estimada del período</div>
+                        <div class="fs-4 fw-bold text-success">
+                            $<?= number_format($totalFacturacionEst, 0, ',', '.') ?>
+                        </div>
+                        <div class="text-muted" style="font-size:.75rem">
+                            de $<?= number_format($totalFacturacionMax, 0, ',', '.') ?> máximo posible
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fs-3 fw-bold text-<?= $pctFacturacion >= PCT_CUMPLIMIENTO ? 'success' : ($pctFacturacion > 0 ? 'warning' : 'danger') ?>">
+                            <?= $pctFacturacion ?>%
+                        </div>
+                        <div class="badge text-bg-<?= $conCoberturaCompleta > 0 ? 'success' : 'secondary' ?>">
+                            <?= $conCoberturaCompleta ?> paquetes completos
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -240,68 +267,102 @@ $sinNingun    = $totalPacientesChart - $conCoberturaTotal;
         </div>
     </div>
     <div class="table-responsive" style="max-height:560px;overflow-y:auto">
-        <table class="table table-bordered table-sm align-middle mb-0" style="font-size:.8rem;min-width:600px">
+        <table class="table table-bordered table-sm align-middle mb-0" style="font-size:.8rem;min-width:700px">
             <thead class="sticky-top bg-white">
                 <tr>
-                    <th class="text-muted fw-semibold" style="min-width:200px;position:sticky;left:0;background:#fff;z-index:2">
+                    <th class="text-muted fw-semibold" style="min-width:190px;position:sticky;left:0;background:#fff;z-index:2">
                         Paciente / CC
                     </th>
                     <?php foreach (TIPOS_SERVICIO as $idx => $codigo): ?>
-                    <th class="text-center fw-semibold" style="min-width:70px">
+                    <th class="text-center fw-semibold" style="min-width:52px" title="Peso: <?= PESOS_SERVICIO[$idx] ?? 0 ?>%">
                         <span class="badge text-bg-primary"><?= Security::e($codigo) ?></span>
+                        <div style="font-size:.65rem;color:#94a3b8;font-weight:400"><?= PESOS_SERVICIO[$idx] ?? 0 ?>%</div>
                     </th>
                     <?php endforeach; ?>
-                    <th class="text-center fw-semibold text-muted" style="min-width:70px">Total</th>
+                    <th class="text-center fw-semibold" style="min-width:60px">%</th>
+                    <th class="text-center fw-semibold" style="min-width:100px">Facturación</th>
                 </tr>
             </thead>
             <tbody>
             <?php if (empty($matrizCobertura)): ?>
-                <tr><td colspan="<?= count(TIPOS_SERVICIO)+2 ?>" class="text-center text-muted py-4">
+                <tr><td colspan="<?= count(TIPOS_SERVICIO)+3 ?>" class="text-center text-muted py-4">
                     No hay atenciones registradas para este período.
                 </td></tr>
             <?php else: ?>
                 <?php foreach ($matrizCobertura as $pid => $pac): ?>
                 <?php
-                    $conSoporte = 0;
-                    $totalSvc   = count($pac['servicios']);
-                    foreach ($pac['servicios'] as $cnt) if ($cnt > 0) $conSoporte++;
-                    $pctPac = $totalSvc > 0 ? round($conSoporte/$totalSvc*100) : 0;
-                    $rowClass = ($conSoporte === $totalSvc && $totalSvc > 0) ? 'table-success'
-                              : ($conSoporte > 0 ? 'table-warning' : '');
+                    $pct      = $pac['pct_ponderado'];
+                    $completo = $pac['completo'];
+                    $rowClass = $completo ? 'table-success'
+                              : ($pct > 0 ? 'table-warning' : '');
+                    $precioBase = PRECIO_PAQUETE[$pac['paquete']] ?? PRECIO_PAQUETE[1];
                 ?>
                 <tr class="<?= $rowClass ?>">
                     <td style="position:sticky;left:0;background:inherit;z-index:1">
-                        <div class="fw-medium text-truncate" style="max-width:200px" title="<?= Security::e($pac['nombre']) ?>">
-                            <?= Security::e($pac['nombre']) ?>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-medium text-truncate" style="max-width:160px" title="<?= Security::e($pac['nombre']) ?>">
+                                    <?= Security::e($pac['nombre']) ?>
+                                </div>
+                                <div class="text-muted" style="font-size:.73rem"><?= Security::e($pac['documento']) ?></div>
+                            </div>
+                            <span class="badge text-bg-<?= $pac['paquete'] === 1 ? 'info' : 'purple' ?> ms-1" style="font-size:.65rem;<?= $pac['paquete']===2?'background:#7c3aed':'' ?>">
+                                P<?= $pac['paquete'] ?>
+                            </span>
                         </div>
-                        <div class="text-muted" style="font-size:.73rem"><?= Security::e($pac['documento']) ?></div>
                         <div class="progress mt-1" style="height:4px;border-radius:2px">
-                            <div class="progress-bar bg-<?= $pctPac===100?'success':($pctPac>0?'warning':'danger') ?>"
-                                 style="width:<?= $pctPac ?>%"></div>
+                            <div class="progress-bar bg-<?= $pct>=PCT_CUMPLIMIENTO?'success':($pct>0?'warning':'danger') ?>"
+                                 style="width:<?= $pct ?>%"></div>
                         </div>
                     </td>
                     <?php foreach (TIPOS_SERVICIO as $svcIdx => $svcCod): ?>
                     <td class="text-center">
                         <?php if (!isset($pac['servicios'][$svcIdx])): ?>
-                            <span class="text-muted" title="Sin atención">—</span>
+                            <span class="text-muted">—</span>
                         <?php elseif ($pac['servicios'][$svcIdx] > 0): ?>
-                            <span class="text-success fw-bold" title="<?= (int)$pac['servicios'][$svcIdx] ?> soporte(s)">
-                                <i class="bi bi-check-circle-fill"></i>
-                            </span>
+                            <i class="bi bi-check-circle-fill text-success" title="Con soporte"></i>
                         <?php else: ?>
-                            <span class="text-warning fw-bold" title="Atención sin soporte">
-                                <i class="bi bi-exclamation-circle-fill"></i>
-                            </span>
+                            <i class="bi bi-exclamation-circle-fill text-warning" title="Sin soporte"></i>
                         <?php endif; ?>
                     </td>
                     <?php endforeach; ?>
-                    <td class="text-center">
-                        <span class="badge text-bg-<?= $pctPac===100?'success':($pctPac>0?'warning':'danger') ?>">
-                            <?= $conSoporte ?>/<?= $totalSvc ?>
+                    <td class="text-center fw-bold">
+                        <span class="text-<?= $pct>=PCT_CUMPLIMIENTO?'success':($pct>0?'warning':'danger') ?>">
+                            <?= $pct ?>%
                         </span>
+                        <?php if ($completo): ?>
+                        <div style="font-size:.65rem" class="text-success">✓ completo</div>
+                        <?php endif; ?>
+                    </td>
+                    <td class="text-end fw-semibold">
+                        <div class="text-<?= $completo?'success':'dark' ?>">
+                            $<?= number_format($pac['valor_facturacion'], 0, ',', '.') ?>
+                        </div>
+                        <div style="font-size:.68rem;color:#94a3b8">
+                            de $<?= number_format($precioBase, 0, ',', '.') ?>
+                        </div>
                     </td>
                 </tr>
                 <?php endforeach; ?>
+                <!-- Fila totales -->
+                <tr class="table-light fw-bold" style="border-top:2px solid #dee2e6">
+                    <td style="position:sticky;left:0;background:#f8fafc;z-index:1">
+                        TOTAL (<?= $totalPacientesChart ?> pacientes)
+                    </td>
+                    <?php foreach (TIPOS_SERVICIO as $i => $c): ?>
+                    <td class="text-center small">
+                        <span class="text-success"><?= $servicioStats[$i]['con'] ?></span>
+                        <span class="text-muted">/<?= $servicioStats[$i]['con'] + $servicioStats[$i]['sin'] ?></span>
+                    </td>
+                    <?php endforeach; ?>
+                    <td class="text-center">
+                        <span class="text-success"><?= $conCoberturaCompleta ?></span>
+                        <span class="text-muted">compl.</span>
+                    </td>
+                    <td class="text-end text-success">
+                        $<?= number_format($totalFacturacionEst, 0, ',', '.') ?>
+                    </td>
+                </tr>
             <?php endif; ?>
             </tbody>
         </table>

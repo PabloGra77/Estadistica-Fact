@@ -52,7 +52,7 @@ if ($uri === '/atenciones' && $method === 'GET') {
     $chartAnio = $filtroAnio !== null ? $filtroAnio : (int)date('Y');
 
     $coberturaRows = Database::fetchAll(
-        "SELECT p.id AS pid, p.documento, p.nombre,
+        "SELECT p.id AS pid, p.documento, p.nombre, p.paquete,
                 a.servicio,
                 COUNT(s.id) AS con_soporte
          FROM Atenciones a
@@ -60,7 +60,7 @@ if ($uri === '/atenciones' && $method === 'GET') {
          LEFT JOIN Soportes s ON s.atencion_id = a.id
          WHERE a.mes_atencion = ? AND a.anio_atencion = ?
            AND p.activo = 1
-         GROUP BY p.id, p.documento, p.nombre, a.servicio
+         GROUP BY p.id, p.documento, p.nombre, p.paquete, a.servicio
          ORDER BY p.nombre, a.servicio",
         [$chartMes, $chartAnio]
     );
@@ -74,6 +74,7 @@ if ($uri === '/atenciones' && $method === 'GET') {
             $matrizCobertura[$pid] = [
                 'nombre'    => $r['nombre'],
                 'documento' => $r['documento'],
+                'paquete'   => (int)$r['paquete'],
                 'servicios' => [],
             ];
         }
@@ -85,21 +86,44 @@ if ($uri === '/atenciones' && $method === 'GET') {
 
     // Estadísticas globales del tablero
     $totalPacientesChart  = count($matrizCobertura);
-    $conCoberturaCompleta = 0;
+    $conCoberturaCompleta = 0; // >= PCT_CUMPLIMIENTO
     $conCoberturaTotal    = 0; // al menos un soporte
     $totalSoportesChart   = 0;
     $totalAtencionesChart = 0;
+    $totalFacturacionEst  = 0;
+    $totalFacturacionMax  = 0;
+
+    foreach ($matrizCobertura as &$px) {
+        $pctPond = 0;
+        foreach ($px['servicios'] as $svcIdx => $cnt) {
+            $totalAtencionesChart++;
+            $peso = PESOS_SERVICIO[$svcIdx] ?? 0;
+            if ($cnt > 0) {
+                $totalSoportesChart += $cnt;
+                $conCoberturaTotal++;
+                $pctPond += $peso;
+            }
+        }
+        // Deshacer el conteo individual — contamos pacientes, no servicios
+        $conCoberturaTotal = 0; // reset, recalculamos abajo por paciente
+
+        $px['pct_ponderado'] = $pctPond;
+        $precioBase = PRECIO_PAQUETE[$px['paquete']] ?? PRECIO_PAQUETE[1];
+        $px['valor_facturacion'] = (int)round($precioBase * $pctPond / 100);
+        $px['completo']          = $pctPond >= PCT_CUMPLIMIENTO;
+        $totalFacturacionEst    += $px['valor_facturacion'];
+        $totalFacturacionMax    += $precioBase;
+    }
+    unset($px);
+
+    // Recalcular conteos por paciente correctamente
     foreach ($matrizCobertura as $px) {
         $tieneSoporte = false;
-        $todosConSoporte = true;
-        foreach ($px['servicios'] as $cnt) {
-            $totalAtencionesChart++;
-            if ($cnt > 0) { $tieneSoporte = true; $totalSoportesChart += $cnt; }
-            else          { $todosConSoporte = false; }
-        }
-        if ($tieneSoporte)       $conCoberturaTotal++;
-        if ($tieneSoporte && $todosConSoporte) $conCoberturaCompleta++;
+        foreach ($px['servicios'] as $cnt) if ($cnt > 0) { $tieneSoporte = true; break; }
+        if ($tieneSoporte) $conCoberturaTotal++;
+        if ($px['completo']) $conCoberturaCompleta++;
     }
+
 
     require BASE_PATH . '/app/Views/atenciones/index.php';
     exit;
