@@ -10,10 +10,17 @@ $serviciosNombres = TIPOS_SERVICIO;
         <h2 class="fw-bold mb-0">Tablero de Atenciones</h2>
         <p class="text-muted small mb-0">IPS Goleman Servicio Integral S.A.S. · <?= date('d/m/Y') ?></p>
     </div>
-    <div class="text-end">
+    <div class="text-end d-flex flex-column align-items-end gap-1">
         <span class="badge rounded-pill" style="background:#0d2660;font-size:.8rem;">
             Hola, <?= Security::e(Auth::username()) ?>
         </span>
+        <?php if ($periodActivo): ?>
+        <span class="badge rounded-pill bg-success" style="font-size:.75rem;">
+            <i class="bi bi-calendar-check me-1"></i><?= Security::e($periodActivo['nombre']) ?>
+        </span>
+        <?php else: ?>
+        <span class="badge rounded-pill bg-secondary" style="font-size:.75rem;">Sin período activo</span>
+        <?php endif; ?>
     </div>
 </div>
 
@@ -40,7 +47,7 @@ $serviciosNombres = TIPOS_SERVICIO;
                 </div>
                 <div>
                     <div class="stat-num"><?= number_format((int)$totalAtenciones) ?></div>
-                    <div class="stat-label">Atenciones totales</div>
+                    <div class="stat-label">Atenciones del período</div>
                 </div>
             </div>
         </div>
@@ -53,7 +60,7 @@ $serviciosNombres = TIPOS_SERVICIO;
                 </div>
                 <div>
                     <div class="stat-num"><?= number_format((int)$soportesPendientes) ?></div>
-                    <div class="stat-label">Soportes pendientes</div>
+                    <div class="stat-label">Pendientes del período</div>
                 </div>
             </div>
         </div>
@@ -66,7 +73,7 @@ $serviciosNombres = TIPOS_SERVICIO;
                 </div>
                 <div>
                     <div class="stat-num"><?= number_format((int)$soportesAprobados) ?></div>
-                    <div class="stat-label">Soportes aprobados</div>
+                    <div class="stat-label">Aprobados del período</div>
                 </div>
             </div>
         </div>
@@ -77,8 +84,11 @@ $serviciosNombres = TIPOS_SERVICIO;
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white border-bottom fw-semibold py-3">
         <i class="bi bi-clock-history me-2 text-primary"></i>
-        Atenciones del mes en curso —
-        <?= $meses[(int)date('m')] ?> <?= date('Y') ?>
+        <?php if ($periodActivo): ?>
+            <i class="bi bi-lightning-fill text-warning me-1"></i>Atenciones — <?= Security::e($periodActivo['nombre']) ?>
+        <?php else: ?>
+            Atenciones — <?= $meses[$periodoMes] ?> <?= $periodoAnio ?>
+        <?php endif; ?>
     </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 small">

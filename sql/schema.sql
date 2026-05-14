@@ -1,4 +1,4 @@
--- ============================================================
+ssh -p 65002 u315763484_OmiWEEfGq@187.124.72.3-- ============================================================
 -- Esquema PPL · Tablero de Atenciones
 -- Motor: MySQL 8 / MariaDB 10.5+  (Hostinger)
 -- Ejecutar UNA VEZ antes de desplegar la aplicación.
@@ -27,7 +27,10 @@ CREATE TABLE IF NOT EXISTS Usuarios (
 CREATE TABLE IF NOT EXISTS Pacientes (
     id              INT UNSIGNED    NOT NULL AUTO_INCREMENT,
     documento       VARCHAR(20)     NOT NULL,
-    nombre          VARCHAR(200)    NOT NULL,
+    primer_nombre    VARCHAR(80)     NOT NULL,
+    segundo_nombre   VARCHAR(80)     NULL,
+    primer_apellido  VARCHAR(80)     NOT NULL,
+    segundo_apellido VARCHAR(80)     NULL,
     paquete         TINYINT UNSIGNED NOT NULL DEFAULT 1
                         COMMENT '1=Paquete1 2=Paquete2',
     nui             VARCHAR(30)     NULL DEFAULT NULL,
@@ -88,6 +91,22 @@ CREATE TABLE IF NOT EXISTS AuditoriasAccion (
     PRIMARY KEY (id),
     KEY idx_fecha (fecha),
     KEY idx_usuario (nombre_usuario)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ── Periodos ──────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS Periodos (
+    id             INT UNSIGNED     NOT NULL AUTO_INCREMENT,
+    nombre         VARCHAR(100)     NOT NULL COMMENT 'Ej: Mayo 2026',
+    mes            TINYINT UNSIGNED NOT NULL,
+    anio           SMALLINT UNSIGNED NOT NULL,
+    activo         TINYINT(1)       NOT NULL DEFAULT 0
+                       COMMENT 'Solo 1 puede estar activo a la vez',
+    estado         ENUM('abierto','cerrado') NOT NULL DEFAULT 'abierto',
+    creado_por     VARCHAR(100)     NOT NULL,
+    fecha_creacion DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_cierre   DATETIME         NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_periodo (mes, anio)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET foreign_key_checks = 1;

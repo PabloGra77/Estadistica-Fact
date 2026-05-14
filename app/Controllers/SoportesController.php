@@ -16,11 +16,16 @@ if ($uri === '/soportes' && $method === 'GET') {
     $porPagina = 20;
     $offset   = ($pagina - 1) * $porPagina;
 
-    $conds  = ['1=1'];
-    $params = [];
+    // Período activo
+    $periodActivo = Database::fetchOne("SELECT * FROM Periodos WHERE activo=1 AND estado='abierto' LIMIT 1");
+    $periodoMes   = $periodActivo ? (int)$periodActivo['mes']  : (int)date('n');
+    $periodoAnio  = $periodActivo ? (int)$periodActivo['anio'] : (int)date('Y');
+
+    $conds  = ['a.mes_atencion=?', 'a.anio_atencion=?'];
+    $params = [$periodoMes, $periodoAnio];
 
     if ($busqueda !== '') {
-        $conds[]  = '(p.nombre LIKE ? OR p.documento LIKE ? OR s.nombre_original LIKE ?)';
+        $conds[]  = '(CONCAT_WS(" ", p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido) LIKE ? OR p.documento LIKE ? OR s.nombre_original LIKE ?)';
         $params[] = "%$busqueda%";
         $params[] = "%$busqueda%";
         $params[] = "%$busqueda%";
@@ -39,7 +44,7 @@ if ($uri === '/soportes' && $method === 'GET') {
     $soportes = Database::fetchAll(
         "SELECT s.id, s.nombre_original, s.estado, s.fecha_carga, s.cargado_por,
                 s.auditado_por, s.fecha_auditoria,
-                p.nombre AS paciente_nombre, p.documento,
+                CONCAT_WS(' ', p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido) AS paciente_nombre, p.documento,
                 a.servicio, a.mes_atencion, a.anio_atencion
          FROM Soportes s
          JOIN Atenciones a ON a.id=s.atencion_id

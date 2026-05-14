@@ -108,3 +108,109 @@ if ($userId !== null && $uAction === 'toggle' && $method === 'POST') {
     header('Location: /admin/usuarios?ok=3');
     exit;
 }
+
+// ── GET /admin/periodos ───────────────────────────────────────────────────────
+if ($uri === '/admin/periodos' && $method === 'GET') {
+    $periodos = Database::fetchAll(
+        "SELECT p.*, COUNT(a.id) AS total_atenciones
+         FROM Periodos p
+         LEFT JOIN Atenciones a ON a.mes_atencion=p.mes AND a.anio_atencion=p.anio
+         GROUP BY p.id
+         ORDER BY p.anio DESC, p.mes DESC"
+    );
+    require BASE_PATH . '/app/Views/admin/periodos.php';
+    exit;
+}
+
+// ── POST /admin/periodos/crear ────────────────────────────────────────────────
+if ($uri === '/admin/periodos/crear' && $method === 'POST') {
+    Security::verifyCsrf();
+    $mes    = Security::validateInt($_POST['mes'] ?? '', 1, 12);
+    $anio   = Security::validateInt($_POST['anio'] ?? '', 2020, 2099);
+    $nombre = Security::sanitizeString($_POST['nombre'] ?? '', 100);
+
+    if (!$mes || !$anio || $nombre === '') {
+        header('Location: /admin/periodos?err=datos'); exit;
+    }
+    $existe = Database::fetchOne("SELECT id FROM Periodos WHERE mes=? AND anio=?", [$mes, $anio]);
+    if ($existe) {
+        header('Location: /admin/periodos?err=duplicado'); exit;
+    }
+    Database::insert(
+        "INSERT INTO Periodos (nombre, mes, anio, activo, estado, creado_por) VALUES (?,?,?,0,'abierto',?)",
+        [$nombre, $mes, $anio, Auth::username()]
+    );
+    $nuevoPeriodoId = Database::fetchOne("SELECT id FROM Periodos WHERE mes=? AND anio=?", [$mes, $anio])['id'];
+    Auth::audit(Auth::username(), 'PERIODO_CREADO', $nombre);
+    header("Location: /admin/periodos/{$nuevoPeriodoId}/pacientes");
+    exit;
+}
+
+// ── POST /admin/periodos/{id}/activar ─────────────────────────────────────────
+preg_match('#^/admin/periodos/(\d+)/activar$#', $uri, $pMatch);
+if (!empty($pMatch) && $method === 'POST') {
+    Security::verifyCsrf();
+    $pid = (int)$pMatch[1];
+    $periodo = Database::fetchOne("SELECT * FROM Periodos WHERE id=?", [$pid]);
+    if (!$periodo || $periodo['estado'] === 'cerrado') {
+        header('Location: /admin/periodos?err=noactiv'); exit;
+    }
+    Database::execute("UPDATE Periodos SET activo=0", []);
+    Database::execute("UPDATE Periodos SET activo=1 WHERE id=?", [$pid]);
+    Auth::audit(Auth::username(), 'PERIODO_ACTIVADO', "ID: $pid | {$periodo['nombre']}");
+    header('Location: /admin/periodos?ok=2');
+    exit;
+}
+
+// ── POST /admin/periodos/{id}/cerrar ──────────────────────────────────────────
+preg_match('#^/admin/periodos/(\d+)/cerrar$#', $uri, $cMatch);
+if (!empty($cMatch) && $method === 'POST') {
+    Security::verifyCsrf();
+    $pid = (int)$cMatch[1];
+    Database::execute(
+        "UPDATE Periodos SET estado='cerrado', activo=0, fecha_cierre=NOW() WHERE id=?",
+        [$pid]
+    );
+    Auth::audit(Auth::username(), 'PERIODO_CERRADO', "ID: $pid");
+    header('Location: /admin/periodos?ok=3');
+    exit;
+}
+
+// ── GET /admin/periodos/{id}/pacientes ────────────────────────────────────────
+preg_match('#^/admin/periodos/(\d+)/pacientes$#', $uri, $ppMatch);
+if (!empty($ppMatch) && $method === 'GET') {
+    $pid = (int)$ppMatch[1];
+    $periodo = Database::fetchOne("SELECT * FROM Periodos WHERE id=?", [$pid]);
+    if (!$periodo) { http_response_code(404); require BASE_PATH . '/app/Views/errors/404.php'; exit; }
+    $pacientes = Database::fetchAll(
+        "SELECT id, documento,
+                CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido) AS nombre_completo,
+                primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+                paquete, nui, fecha_nacimiento
+         FROM Pacientes
+         WHERE activo = 1
+         ORDER BY primer_apellido, primer_nombre"
+    );
+    require BASE_PATH . '/app/Views/admin/periodo_pacientes.php';
+    exit;
+}
+
+// ── POST /admin/periodos/{id}/pacientes ───────────────────────────────────────
+if (!empty($ppMatch) && $method === 'POST') {
+    Security::verifyCsrf();
+    $pid = (int)$ppMatch[1];
+    $periodo = Database::fetchOne("SELECT id FROM Periodos WHERE id=?", [$pid]);
+    if (!$periodo) { header('Location: /admin/periodos'); exit; }
+
+    $paquetes = $_POST['paquete'] ?? [];
+    foreach ($paquetes as $pacienteId => $nuevoPaquete) {
+        $pid2 = (int)$pacienteId;
+        $paq  = Security::validateInt($nuevoPaquete, 1, 3);
+        if ($pid2 > 0 && $paq) {
+            Database::execute("UPDATE Pacientes SET paquete=? WHERE id=?", [$paq, $pid2]);
+        }
+    }
+    Auth::audit(Auth::username(), 'PAQUETES_ACTUALIZADOS', "Período ID: $pid");
+    header('Location: /admin/periodos?ok=1');
+    exit;
+}

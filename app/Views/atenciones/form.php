@@ -4,7 +4,7 @@ $errors ??= [];
 $pageTitle = 'Nueva Atención — PPL';
 require BASE_PATH . '/app/Views/layout/header.php';
 $meses = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-$atencionPresel = Security::validateInt($_GET['atencion_id'] ?? '', 1) ?? null;
+$periodoFijo = $periodActivo ?? null;
 ?>
 
 <div class="d-flex align-items-center mb-4 gap-2">
@@ -49,6 +49,10 @@ $atencionPresel = Security::validateInt($_GET['atencion_id'] ?? '', 1) ?? null;
             <div class="row g-2 mb-3">
                 <div class="col">
                     <label for="mes_atencion" class="form-label fw-semibold small">Mes <span class="text-danger">*</span></label>
+                    <?php if ($periodoFijo): ?>
+                    <input type="hidden" name="mes_atencion" value="<?= (int)$periodoFijo['mes'] ?>"/>
+                    <input type="text" class="form-control form-control-sm bg-light" value="<?= Security::e($meses[(int)$periodoFijo['mes']]) ?>" readonly/>
+                    <?php else: ?>
                     <select id="mes_atencion" name="mes_atencion" class="form-select form-select-sm" required>
                         <?php for ($i=1;$i<=12;$i++): ?>
                         <option value="<?=$i?>" <?= (int)($values['mes_atencion'] ?? date('n')) === $i ? 'selected':'' ?>>
@@ -56,13 +60,27 @@ $atencionPresel = Security::validateInt($_GET['atencion_id'] ?? '', 1) ?? null;
                         </option>
                         <?php endfor; ?>
                     </select>
+                    <?php endif; ?>
                 </div>
                 <div class="col">
                     <label for="anio_atencion" class="form-label fw-semibold small">Año <span class="text-danger">*</span></label>
+                    <?php if ($periodoFijo): ?>
+                    <input type="hidden" name="anio_atencion" value="<?= (int)$periodoFijo['anio'] ?>"/>
+                    <input type="text" class="form-control form-control-sm bg-light" value="<?= (int)$periodoFijo['anio'] ?>" readonly/>
+                    <?php else: ?>
                     <input type="number" id="anio_atencion" name="anio_atencion" class="form-control form-control-sm"
                            value="<?= Security::e($values['anio_atencion'] ?? date('Y')) ?>"
                            min="2020" max="2099" required/>
+                    <?php endif; ?>
                 </div>
+                <?php if ($periodoFijo): ?>
+                <div class="col-12">
+                    <div class="alert alert-info py-1 px-2 mb-0 small">
+                        <i class="bi bi-calendar-check-fill me-1"></i>
+                        Período activo: <strong><?= Security::e($periodoFijo['nombre']) ?></strong>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="d-flex gap-2 mt-4">

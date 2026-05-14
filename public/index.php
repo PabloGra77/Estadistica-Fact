@@ -4,7 +4,11 @@
  * Compatible con el .htaccess de Hostinger.
  */
 
-require_once __DIR__ . '/../config/config.php';
+// Detectar si index.php está en public/ (dev) o en la raíz (producción Hostinger)
+$_configPath = file_exists(__DIR__ . '/../config/config.php')
+    ? __DIR__ . '/../config/config.php'
+    : __DIR__ . '/config/config.php';
+require_once $_configPath;
 require_once BASE_PATH . '/app/Core/Database.php';
 require_once BASE_PATH . '/app/Core/Security.php';
 require_once BASE_PATH . '/app/Core/Auth.php';
@@ -48,9 +52,10 @@ match (true) {
     preg_match('#^/pacientes/(\d+)/editar$#', $uri, $m) === 1 && $method === 'POST' => require BASE_PATH . '/app/Controllers/PacientesController.php',
 
     // Atenciones
-    $uri === '/atenciones' && $method === 'GET'             => require BASE_PATH . '/app/Controllers/AtencionesController.php',
-    $uri === '/atenciones/crear' && $method === 'GET'       => require BASE_PATH . '/app/Controllers/AtencionesController.php',
-    $uri === '/atenciones/crear' && $method === 'POST'      => require BASE_PATH . '/app/Controllers/AtencionesController.php',
+    $uri === '/atenciones' && $method === 'GET'                  => require BASE_PATH . '/app/Controllers/AtencionesController.php',
+    $uri === '/atenciones/exportar-excel' && $method === 'GET'   => require BASE_PATH . '/app/Controllers/AtencionesController.php',
+    $uri === '/atenciones/crear' && $method === 'GET'            => require BASE_PATH . '/app/Controllers/AtencionesController.php',
+    $uri === '/atenciones/crear' && $method === 'POST'           => require BASE_PATH . '/app/Controllers/AtencionesController.php',
 
     // Soportes
     $uri === '/soportes' && $method === 'GET'                       => require BASE_PATH . '/app/Controllers/SoportesController.php',
@@ -67,6 +72,14 @@ match (true) {
     $uri === '/admin/usuarios/crear' && $method === 'POST'  => require BASE_PATH . '/app/Controllers/AdminController.php',
     preg_match('#^/admin/usuarios/(\d+)/editar$#', $uri, $m) === 1 && $method === 'POST' => require BASE_PATH . '/app/Controllers/AdminController.php',
     preg_match('#^/admin/usuarios/(\d+)/toggle$#', $uri, $m) === 1 && $method === 'POST' => require BASE_PATH . '/app/Controllers/AdminController.php',
+
+    // Admin - períodos
+    $uri === '/admin/periodos' && $method === 'GET'                                             => require BASE_PATH . '/app/Controllers/AdminController.php',
+    $uri === '/admin/periodos/crear' && $method === 'POST'                                      => require BASE_PATH . '/app/Controllers/AdminController.php',
+    preg_match('#^/admin/periodos/(\d+)/activar$#',   $uri, $m) === 1 && $method === 'POST'    => require BASE_PATH . '/app/Controllers/AdminController.php',
+    preg_match('#^/admin/periodos/(\d+)/cerrar$#',    $uri, $m) === 1 && $method === 'POST'    => require BASE_PATH . '/app/Controllers/AdminController.php',
+    preg_match('#^/admin/periodos/(\d+)/pacientes$#', $uri, $m) === 1 && $method === 'GET'     => require BASE_PATH . '/app/Controllers/AdminController.php',
+    preg_match('#^/admin/periodos/(\d+)/pacientes$#', $uri, $m) === 1 && $method === 'POST'    => require BASE_PATH . '/app/Controllers/AdminController.php',
 
     // 404
     default => (function () {

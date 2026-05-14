@@ -314,3 +314,24 @@ body {
     transition: color .15s, background .15s;
 }
 .btn-logout:hover { color: #f87171; background: rgba(248,113,113,.12); }
+
+/* ── Badge período activo en sidebar ────────────────────────────────────────── */
+.periodo-activo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    margin-top: .45rem;
+    padding: .25rem .6rem;
+    background: rgba(99,219,130,.15);
+    color: #63db82;
+    border: 1px solid rgba(99,219,130,.35);
+    border-radius: 20px;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.x-small { font-size: .72rem; }

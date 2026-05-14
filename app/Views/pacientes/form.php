@@ -1,6 +1,6 @@
 <?php
 $modoEditar ??= false;
-$values     ??= ['documento' => '', 'nombre' => '', 'paquete' => 1, 'nui' => '', 'fecha_nacimiento' => '', 'activo' => 1];
+$values ??= ['documento' => '', 'primer_nombre' => '', 'segundo_nombre' => '', 'primer_apellido' => '', 'segundo_apellido' => '', 'paquete' => 1, 'nui' => '', 'fecha_nacimiento' => '', 'activo' => 1];
 $errors     ??= [];
 // Calcular edad si hay fecha de nacimiento
 $edadTexto = '';
@@ -36,11 +36,31 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 <div class="form-text">Solo letras, números y guiones. Máx. 20 caracteres.</div>
             </div>
 
-            <div class="mb-3">
-                <label for="nombre" class="form-label fw-semibold small">Nombre completo <span class="text-danger">*</span></label>
-                <input type="text" id="nombre" name="nombre" class="form-control form-control-sm"
-                       value="<?= Security::e($values['nombre']) ?>"
-                       maxlength="200" required />
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label for="primer_nombre" class="form-label fw-semibold small">Primer nombre <span class="text-danger">*</span></label>
+                    <input type="text" id="primer_nombre" name="primer_nombre" class="form-control form-control-sm"
+                           value="<?= Security::e($values['primer_nombre']) ?>"
+                           maxlength="80" required />
+                </div>
+                <div class="col-6">
+                    <label for="segundo_nombre" class="form-label fw-semibold small">Segundo nombre <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input type="text" id="segundo_nombre" name="segundo_nombre" class="form-control form-control-sm"
+                           value="<?= Security::e($values['segundo_nombre'] ?? '') ?>"
+                           maxlength="80" />
+                </div>
+                <div class="col-6">
+                    <label for="primer_apellido" class="form-label fw-semibold small">Primer apellido <span class="text-danger">*</span></label>
+                    <input type="text" id="primer_apellido" name="primer_apellido" class="form-control form-control-sm"
+                           value="<?= Security::e($values['primer_apellido']) ?>"
+                           maxlength="80" required />
+                </div>
+                <div class="col-6">
+                    <label for="segundo_apellido" class="form-label fw-semibold small">Segundo apellido <span class="text-muted fw-normal">(opcional)</span></label>
+                    <input type="text" id="segundo_apellido" name="segundo_apellido" class="form-control form-control-sm"
+                           value="<?= Security::e($values['segundo_apellido'] ?? '') ?>"
+                           maxlength="80" />
+                </div>
             </div>
 
             <div class="mb-3">
@@ -48,6 +68,7 @@ require BASE_PATH . '/app/Views/layout/header.php';
                 <select id="paquete" name="paquete" class="form-select form-select-sm" required>
                     <option value="1" <?= (int)$values['paquete'] === 1 ? 'selected' : '' ?>>Paquete 1</option>
                     <option value="2" <?= (int)$values['paquete'] === 2 ? 'selected' : '' ?>>Paquete 2</option>
+                    <option value="3" <?= (int)$values['paquete'] === 3 ? 'selected' : '' ?>>Evento <small class="text-muted">(misma estadística que P1)</small></option>
                 </select>
             </div>
 

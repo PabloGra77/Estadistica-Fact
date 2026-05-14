@@ -21,6 +21,16 @@ $meses = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','
 <?php endif; ?>
 
 <!-- Filtros -->
+<?php if ($periodActivo): ?>
+<div class="alert alert-primary py-2 mb-3 small">
+    <i class="bi bi-lightning-fill me-1"></i>Mostrando soportes del período activo: <strong><?= Security::e($periodActivo['nombre']) ?></strong>
+</div>
+<?php else: ?>
+<div class="alert alert-secondary py-2 mb-3 small">
+    <i class="bi bi-info-circle me-1"></i>Sin período activo — mostrando mes actual: <strong><?= $meses[$periodoMes] ?>/<?= $periodoAnio ?></strong>
+</div>
+<?php endif; ?>
+
 <form method="get" action="/soportes" class="mb-3 row g-2 align-items-end" style="max-width:600px">
     <div class="col">
         <input type="search" name="q" class="form-control form-control-sm"

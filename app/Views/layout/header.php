@@ -19,6 +19,7 @@ $rolActual = Auth::rol();
 $rolColor  = $rolColors[$rolActual] ?? '#94a3b8';
 $rolIcon   = $rolIcons[$rolActual]  ?? '👤';
 $rolNombre = Auth::rolNombre();
+$periodActivo = Database::fetchOne("SELECT nombre FROM Periodos WHERE activo=1 AND estado='abierto' LIMIT 1");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -42,6 +43,11 @@ $rolNombre = Auth::rolNombre();
         <div class="sidebar-brand">
             <span class="brand-ppl">PPL</span>
             <span class="brand-sub">IPS Goleman</span>
+            <?php if ($periodActivo): ?>
+            <div class="periodo-activo-badge">
+                <i class="bi bi-calendar-check-fill"></i> <?= Security::e($periodActivo['nombre']) ?>
+            </div>
+            <?php endif; ?>
         </div>
         <nav class="sidebar-nav">
             <a href="/" class="nav-item <?= ($uri === '/') ? 'active' : '' ?>">
@@ -58,8 +64,11 @@ $rolNombre = Auth::rolNombre();
             </a>
             <?php if (Auth::isAdmin()): ?>
             <div class="nav-section">Administración</div>
-            <a href="/admin/usuarios" class="nav-item <?= str_starts_with($uri, '/admin') ? 'active' : '' ?>">
+            <a href="/admin/usuarios" class="nav-item <?= str_starts_with($uri, '/admin/usuarios') ? 'active' : '' ?>">
                 <i class="bi bi-person-gear"></i> Usuarios
+            </a>
+            <a href="/admin/periodos" class="nav-item <?= str_starts_with($uri, '/admin/periodos') ? 'active' : '' ?>">
+                <i class="bi bi-calendar3"></i> Períodos
             </a>
             <?php endif; ?>
         </nav>

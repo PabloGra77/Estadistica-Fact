@@ -21,7 +21,7 @@ if ($uri === '/pacientes' && $method === 'GET') {
 
     if ($busqueda !== '') {
         $params = ["%$busqueda%", "%$busqueda%"];
-        $where  = "AND (p.documento LIKE ? OR p.nombre LIKE ?)";
+        $where  = "AND (p.documento LIKE ? OR CONCAT_WS(' ', p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido) LIKE ?)";
 
         $total = Database::fetchOne(
             "SELECT COUNT(*) AS total FROM Pacientes p WHERE p.activo=1 $where",
@@ -29,13 +29,16 @@ if ($uri === '/pacientes' && $method === 'GET') {
         )['total'] ?? 0;
 
         $pacientes = Database::fetchAll(
-            "SELECT p.id, p.documento, p.nombre, p.paquete, p.nui, p.fecha_creacion,
+            "SELECT p.id, p.documento,
+                    CONCAT_WS(' ', p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido) AS nombre,
+                    p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido,
+                    p.paquete, p.nui, p.fecha_creacion,
                     COUNT(a.id) AS num_atenciones
              FROM Pacientes p
              LEFT JOIN Atenciones a ON a.paciente_id = p.id
              WHERE p.activo=1 $where
              GROUP BY p.id
-             ORDER BY p.nombre ASC
+             ORDER BY p.primer_apellido ASC, p.primer_nombre ASC
              LIMIT $porPagina OFFSET $offset",
             $params
         );
@@ -51,21 +54,25 @@ if ($uri === '/pacientes/crear') {
     Auth::requireRole(ROL_ADMINISTRADOR, ROL_FACTURADOR, ROL_EQUIPO_PPL);
 
     $errors = [];
-    $values = ['documento' => '', 'nombre' => '', 'paquete' => 1, 'nui' => '', 'fecha_nacimiento' => ''];
+    $values = ['documento' => '', 'primer_nombre' => '', 'segundo_nombre' => '', 'primer_apellido' => '', 'segundo_apellido' => '', 'paquete' => 1, 'nui' => '', 'fecha_nacimiento' => ''];
 
     if ($method === 'POST') {
         Security::verifyCsrf();
 
-        $doc    = Security::sanitizeString($_POST['documento'] ?? '', 20);
-        $nombre = Security::sanitizeString($_POST['nombre'] ?? '', 200);
-        $paquete = Security::validateInt($_POST['paquete'] ?? '', 1, 2);
+        $doc             = Security::sanitizeString($_POST['documento'] ?? '', 20);
+        $primerNombre    = Security::sanitizeString($_POST['primer_nombre'] ?? '', 80);
+        $segundoNombre   = Security::sanitizeString($_POST['segundo_nombre'] ?? '', 80);
+        $primerApellido  = Security::sanitizeString($_POST['primer_apellido'] ?? '', 80);
+        $segundoApellido = Security::sanitizeString($_POST['segundo_apellido'] ?? '', 80);
+        $paquete = Security::validateInt($_POST['paquete'] ?? '', 1, 3);
         $nui    = Security::sanitizeString($_POST['nui'] ?? '', 30);
         $fnac   = trim($_POST['fecha_nacimiento'] ?? '');
         $fnac   = ($fnac !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fnac)) ? $fnac : null;
 
         if ($doc === '') $errors[] = 'El documento es obligatorio.';
         if (!preg_match('/^[0-9A-Za-z\-]{1,20}$/', $doc)) $errors[] = 'Documento inválido.';
-        if ($nombre === '') $errors[] = 'El nombre es obligatorio.';
+        if ($primerNombre === '') $errors[] = 'El primer nombre es obligatorio.';
+        if ($primerApellido === '') $errors[] = 'El primer apellido es obligatorio.';
         if ($paquete === null) $errors[] = 'Paquete inválido.';
 
         if (empty($errors)) {
@@ -74,15 +81,15 @@ if ($uri === '/pacientes/crear') {
                 $errors[] = "Ya existe un paciente con el documento $doc.";
             } else {
                 Database::insert(
-                    "INSERT INTO Pacientes (documento, nombre, paquete, nui, fecha_nacimiento) VALUES (?,?,?,?,?)",
-                    [$doc, $nombre, $paquete, $nui !== '' ? $nui : null, $fnac]
+                    "INSERT INTO Pacientes (documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, paquete, nui, fecha_nacimiento) VALUES (?,?,?,?,?,?,?,?)",
+                    [$doc, $primerNombre, $segundoNombre !== '' ? $segundoNombre : null, $primerApellido, $segundoApellido !== '' ? $segundoApellido : null, $paquete, $nui !== '' ? $nui : null, $fnac]
                 );
                 Auth::audit(Auth::username(), 'PACIENTE_CREADO', "Documento: $doc");
                 header('Location: /pacientes?ok=1');
                 exit;
             }
         }
-        $values = ['documento' => $doc, 'nombre' => $nombre, 'paquete' => $paquete ?? 1, 'nui' => $nui, 'fecha_nacimiento' => $fnac ?? ''];
+        $values = ['documento' => $doc, 'primer_nombre' => $primerNombre, 'segundo_nombre' => $segundoNombre, 'primer_apellido' => $primerApellido, 'segundo_apellido' => $segundoApellido, 'paquete' => $paquete ?? 1, 'nui' => $nui, 'fecha_nacimiento' => $fnac ?? ''];
     }
 
     require BASE_PATH . '/app/Views/pacientes/form.php';
@@ -101,16 +108,19 @@ if ($pacienteId !== null && str_ends_with($uri, '/editar')) {
     if ($method === 'POST') {
         Security::verifyCsrf();
 
-        $doc    = Security::sanitizeString($_POST['documento'] ?? '', 20);
-        $nombre = Security::sanitizeString($_POST['nombre'] ?? '', 200);
-        $paquete = Security::validateInt($_POST['paquete'] ?? '', 1, 2);
+        $doc             = Security::sanitizeString($_POST['documento'] ?? '', 20);
+        $primerNombre    = Security::sanitizeString($_POST['primer_nombre'] ?? '', 80);
+        $segundoNombre   = Security::sanitizeString($_POST['segundo_nombre'] ?? '', 80);
+        $primerApellido  = Security::sanitizeString($_POST['primer_apellido'] ?? '', 80);
+        $segundoApellido = Security::sanitizeString($_POST['segundo_apellido'] ?? '', 80);
+        $paquete = Security::validateInt($_POST['paquete'] ?? '', 1, 3);
         $nui    = Security::sanitizeString($_POST['nui'] ?? '', 30);
         $activo  = isset($_POST['activo']) ? 1 : 0;
         $fnac   = trim($_POST['fecha_nacimiento'] ?? '');
         $fnac   = ($fnac !== '' && preg_match('/^\d{4}-\d{2}-\d{2}$/', $fnac)) ? $fnac : null;
 
-        if ($doc === '' || $nombre === '' || $paquete === null) {
-            $errors[] = 'Todos los campos son obligatorios.';
+        if ($doc === '' || $primerNombre === '' || $primerApellido === '' || $paquete === null) {
+            $errors[] = 'Documento, primer nombre y primer apellido son obligatorios.';
         }
 
         if (empty($errors)) {
@@ -121,15 +131,15 @@ if ($pacienteId !== null && str_ends_with($uri, '/editar')) {
                 $errors[] = "El documento $doc ya está registrado en otro paciente.";
             } else {
                 Database::execute(
-                    "UPDATE Pacientes SET documento=?, nombre=?, paquete=?, nui=?, fecha_nacimiento=?, activo=? WHERE id=?",
-                    [$doc, $nombre, $paquete, $nui !== '' ? $nui : null, $fnac, $activo, $pacienteId]
+                    "UPDATE Pacientes SET documento=?, primer_nombre=?, segundo_nombre=?, primer_apellido=?, segundo_apellido=?, paquete=?, nui=?, fecha_nacimiento=?, activo=? WHERE id=?",
+                    [$doc, $primerNombre, $segundoNombre !== '' ? $segundoNombre : null, $primerApellido, $segundoApellido !== '' ? $segundoApellido : null, $paquete, $nui !== '' ? $nui : null, $fnac, $activo, $pacienteId]
                 );
                 Auth::audit(Auth::username(), 'PACIENTE_EDITADO', "ID: $pacienteId");
                 header('Location: /pacientes?ok=2');
                 exit;
             }
         }
-        $paciente = array_merge($paciente, ['documento'=>$doc,'nombre'=>$nombre,'paquete'=>$paquete,'activo'=>$activo,'fecha_nacimiento'=>$fnac ?? '']);
+        $paciente = array_merge($paciente, ['documento'=>$doc,'primer_nombre'=>$primerNombre,'segundo_nombre'=>$segundoNombre,'primer_apellido'=>$primerApellido,'segundo_apellido'=>$segundoApellido,'paquete'=>$paquete,'activo'=>$activo,'fecha_nacimiento'=>$fnac ?? '']);
     }
 
     $values = $paciente;
@@ -145,10 +155,10 @@ if ($uri === '/pacientes/importar/plantilla' && $method === 'GET') {
     header('Content-Disposition: attachment; filename="plantilla_pacientes.csv"');
     echo "\xEF\xBB\xBF";
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['Documento (CC)', 'Nombre completo', 'Paquete', 'NUI', 'Fecha Nacimiento (dd/mm/yyyy)'], ';');
-    fputcsv($out, ['12345678', 'PEREZ GARCIA JUAN PABLO', '1', 'NUI-0001', '15/06/1985'], ';');
-    fputcsv($out, ['87654321', 'MARTINEZ LOPEZ MARIA', '2', '', '20/11/1990'], ';');
-    fputcsv($out, ['AB12CD', 'GOMEZ TORRES PEDRO', '1', '', ''], ';');
+    fputcsv($out, ['Documento (CC)', 'Primer Nombre', 'Segundo Nombre', 'Primer Apellido', 'Segundo Apellido', 'Paquete (1=P1, 2=P2, 3=Evento)', 'NUI', 'Fecha Nacimiento (dd/mm/yyyy)'], ';');
+    fputcsv($out, ['12345678', 'JUAN', 'PABLO', 'PEREZ', 'GARCIA', '1', 'NUI-0001', '15/06/1985'], ';');
+    fputcsv($out, ['87654321', 'MARIA', '', 'MARTINEZ', 'LOPEZ', '2', '', '20/11/1990'], ';');
+    fputcsv($out, ['AB12CD', 'PEDRO', '', 'GOMEZ', 'TORRES', '3', '', ''], ';');
     fclose($out);
     exit;
 }
@@ -158,7 +168,7 @@ if ($uri === '/pacientes/exportar' && $method === 'GET') {
     Auth::requireRole(ROL_ADMINISTRADOR, ROL_FACTURADOR, ROL_EQUIPO_PPL, ROL_ESTADISTICO);
 
     $pacientes = Database::fetchAll(
-        "SELECT documento, nombre, paquete, nui, fecha_nacimiento, fecha_creacion FROM Pacientes WHERE activo=1 ORDER BY nombre ASC",
+        "SELECT documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, paquete, nui, fecha_nacimiento, fecha_creacion FROM Pacientes WHERE activo=1 ORDER BY primer_apellido ASC, primer_nombre ASC",
         []
     );
 
@@ -168,11 +178,14 @@ if ($uri === '/pacientes/exportar' && $method === 'GET') {
     echo "\xEF\xBB\xBF"; // BOM UTF-8 para Excel
 
     $out = fopen('php://output', 'w');
-    fputcsv($out, ['Documento (CC)', 'Nombre completo', 'Paquete', 'NUI', 'Fecha Nacimiento'], ';');
+    fputcsv($out, ['Documento (CC)', 'Primer Nombre', 'Segundo Nombre', 'Primer Apellido', 'Segundo Apellido', 'Paquete', 'NUI', 'Fecha Nacimiento'], ';');
     foreach ($pacientes as $p) {
         fputcsv($out, [
             $p['documento'],
-            $p['nombre'],
+            $p['primer_nombre'],
+            $p['segundo_nombre'] ?? '',
+            $p['primer_apellido'],
+            $p['segundo_apellido'] ?? '',
             $p['paquete'],
             $p['nui'] ?? '',
             $p['fecha_nacimiento'] ? date('d/m/Y', strtotime($p['fecha_nacimiento'])) : '',
@@ -222,11 +235,14 @@ if ($uri === '/pacientes/importar' && $method === 'POST') {
                 }
                 if (count($row) < 2) { $importErrors[] = "Fila $fila: formato incorrecto."; continue; }
 
-                $doc    = Security::sanitizeString(trim($row[0] ?? ''), 20);
-                $nombre = Security::sanitizeString(trim($row[1] ?? ''), 200);
-                $paquete = (int)trim($row[2] ?? 1);
-                $nui    = Security::sanitizeString(trim($row[3] ?? ''), 30);
-                $fnacRaw = trim($row[4] ?? '');
+                $doc             = Security::sanitizeString(trim($row[0] ?? ''), 20);
+                $primerNombre    = Security::sanitizeString(trim($row[1] ?? ''), 80);
+                $segundoNombre   = Security::sanitizeString(trim($row[2] ?? ''), 80);
+                $primerApellido  = Security::sanitizeString(trim($row[3] ?? ''), 80);
+                $segundoApellido = Security::sanitizeString(trim($row[4] ?? ''), 80);
+                $paquete = (int)trim($row[5] ?? 1);
+                $nui    = Security::sanitizeString(trim($row[6] ?? ''), 30);
+                $fnacRaw = trim($row[7] ?? '');
                 // Acepta formatos dd/mm/yyyy, dd-mm-yyyy o yyyy-mm-dd
                 $fnac = null;
                 if ($fnacRaw !== '') {
@@ -237,22 +253,23 @@ if ($uri === '/pacientes/importar' && $method === 'POST') {
                     }
                 }
 
-                if ($doc === '')    { $importErrors[] = "Fila $fila: documento vacío."; continue; }
+                if ($doc === '')         { $importErrors[] = "Fila $fila: documento vacío."; continue; }
                 if (!preg_match('/^[0-9A-Za-z\-]{1,20}$/', $doc)) { $importErrors[] = "Fila $fila: documento inválido ($doc)."; continue; }
-                if ($nombre === '') { $importErrors[] = "Fila $fila: nombre vacío."; continue; }
-                if (!in_array($paquete, [1, 2])) $paquete = 1;
+                if ($primerNombre === '')   { $importErrors[] = "Fila $fila: primer nombre vacío."; continue; }
+                if ($primerApellido === '') { $importErrors[] = "Fila $fila: primer apellido vacío."; continue; }
+                if (!in_array($paquete, [1, 2, 3])) $paquete = 1;
 
                 $existe = Database::fetchOne("SELECT id FROM Pacientes WHERE documento=?", [$doc]);
                 if ($existe) {
                     Database::execute(
-                        "UPDATE Pacientes SET nombre=?, paquete=?, nui=?, fecha_nacimiento=? WHERE documento=?",
-                        [$nombre, $paquete, $nui !== '' ? $nui : null, $fnac, $doc]
+                        "UPDATE Pacientes SET primer_nombre=?, segundo_nombre=?, primer_apellido=?, segundo_apellido=?, paquete=?, nui=?, fecha_nacimiento=? WHERE documento=?",
+                        [$primerNombre, $segundoNombre !== '' ? $segundoNombre : null, $primerApellido, $segundoApellido !== '' ? $segundoApellido : null, $paquete, $nui !== '' ? $nui : null, $fnac, $doc]
                     );
                     $actualizados++;
                 } else {
                     Database::insert(
-                        "INSERT INTO Pacientes (documento, nombre, paquete, nui, fecha_nacimiento) VALUES (?,?,?,?,?)",
-                        [$doc, $nombre, $paquete, $nui !== '' ? $nui : null, $fnac]
+                        "INSERT INTO Pacientes (documento, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, paquete, nui, fecha_nacimiento) VALUES (?,?,?,?,?,?,?,?)",
+                        [$doc, $primerNombre, $segundoNombre !== '' ? $segundoNombre : null, $primerApellido, $segundoApellido !== '' ? $segundoApellido : null, $paquete, $nui !== '' ? $nui : null, $fnac]
                     );
                     $insertados++;
                 }
